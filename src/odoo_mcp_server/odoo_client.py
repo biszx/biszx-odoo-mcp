@@ -2,13 +2,12 @@
 Odoo XML-RPC client for MCP server integration
 """
 
+import http.client
 import json
 import os
 import re
 import socket
 import urllib.parse
-
-import http.client
 import xmlrpc.client
 
 
@@ -101,7 +100,7 @@ class OdooClient:
             )
             if not self.uid:
                 raise ValueError("Authentication failed: Invalid username or password")
-        except (socket.error, socket.timeout, ConnectionError, TimeoutError) as e:
+        except (OSError, socket.timeout, ConnectionError, TimeoutError) as e:
             print(f"Connection error: {str(e)}", file=os.sys.stderr)
             raise ConnectionError(f"Failed to connect to Odoo server: {str(e)}")
         except Exception as e:
@@ -249,7 +248,9 @@ class OdooClient:
 
         Examples:
             >>> client = OdooClient(url, db, username, password)
-            >>> records = client.search_read('res.partner', [('is_company', '=', True)], limit=5)
+            >>> records = client.search_read('res.partner', [
+                    ('is_company', '=', True)
+                ], limit=5)
             >>> print(len(records))
             5
         """
@@ -396,11 +397,12 @@ def load_config():
     for path in config_paths:
         expanded_path = os.path.expanduser(path)
         if os.path.exists(expanded_path):
-            with open(expanded_path, "r") as f:
+            with open(expanded_path) as f:
                 return json.load(f)
 
     raise FileNotFoundError(
-        "No Odoo configuration found. Please create an odoo_config.json file or set environment variables."
+        "No Odoo configuration found. Please create an odoo_config.json file"
+        " or set environment variables."
     )
 
 

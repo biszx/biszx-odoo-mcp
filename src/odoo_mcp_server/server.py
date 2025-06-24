@@ -5,10 +5,12 @@ Provides MCP tools and resources for interacting with Odoo ERP systems
 """
 
 import json
+import os
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, AsyncIterator, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 
 from mcp.server.fastmcp import Context, FastMCP
 from pydantic import BaseModel, Field
@@ -146,7 +148,8 @@ class DomainCondition(BaseModel):
 
     field: str = Field(description="Field name to search")
     operator: str = Field(
-        description="Operator (e.g., '=', '!=', '>', '<', 'in', 'not in', 'like', 'ilike')"
+        description="Operator (e.g., '=', '!=', '>', '<', 'in',"
+        " 'not in', 'like', 'ilike')"
     )
     value: Any = Field(description="Value to compare against")
 
@@ -160,7 +163,8 @@ class SearchDomain(BaseModel):
 
     conditions: List[DomainCondition] = Field(
         default_factory=list,
-        description="List of conditions for searching. All conditions are combined with AND operator.",
+        description="List of conditions for searching. "
+        "All conditions are combined with AND operator.",
     )
 
     def to_domain_list(self) -> List[List]:
@@ -314,7 +318,8 @@ def execute_method(
                             parsed_domain = ast.literal_eval(domain)
                             if isinstance(parsed_domain, list):
                                 domain_list = parsed_domain
-                        except:
+                        except Exception as e:
+                            print(f"Error parsing domain: {str(e)}", file=os.sys.stderr)
                             domain_list = []
 
                 # Xác thực domain_list

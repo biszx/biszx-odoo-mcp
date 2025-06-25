@@ -20,8 +20,8 @@ authors = [
     {name = "Biszx", email = "isares.br@gmail.com"}
 ]
 dependencies = [
-    "fastmcp>=2.9.0",
     "loguru>=0.7.3",
+    "mcp[cli]>=1.9.4",
     "odoorpc>=0.10.1",
     "python-dotenv>=1.1.1",
 ]

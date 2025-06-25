@@ -6,23 +6,9 @@ import urllib.parse
 
 import odoorpc
 from loguru import logger
+
+from odoo_mcp_server.server.response import Response
 from odoo_mcp_server.tools.config import Config
-
-
-class Response:
-    """
-    Standard response wrapper for OdooClient methods.
-    """
-
-    def __init__(self, data=None, error=None):
-        self.data = data
-        self.error = error
-
-    def to_dict(self):
-        """Return the response as a dictionary with either 'data' or 'error' key."""
-        if self.error is not None:
-            return {"error": self.error}
-        return {"data": self.data}
 
 
 class OdooClient:

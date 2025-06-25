@@ -43,7 +43,7 @@ The project follows a modular structure, with separate directories for different
 3. **Implementing Changes**: Make the necessary code changes to improve the codebase, following best practices.
 4. **Testing**: Ensure all changes are covered by tests and that the tests pass successfully.
 5. **Documentation**: Update `README.md` in `Features`, `Tools` and `Resources` sections to reflect any changes made, including new features or tools added.
-6. **Code Review**: Submit changes for review, ensuring they meet the project's coding standards and guidelines.
+6. **Code Review**: Ensuring they meet the project's coding standards and guidelines.
 
 # Critical Instructions
 

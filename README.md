@@ -265,6 +265,28 @@ Odoo uses domain syntax for filtering records. Here are common patterns:
    - `ODOO_VERIFY_SSL`: Whether to verify SSL certificates (default: true)
    - `HTTP_PROXY`: Force the ODOO connection to use an HTTP proxy
 
+### Logging Configuration
+
+The server supports configurable logging levels via the `LOG_LEVEL` environment variable:
+
+- `INFO` (default): Shows essential operational information with friendly emojis
+- `DEBUG`: Shows detailed debugging information including connection details and environment variables
+- `WARNING`: Shows only warnings and errors
+- `ERROR`: Shows only error messages
+
+Example usage:
+
+```bash
+# Default info level with friendly emojis
+python -m odoo_mcp_server
+
+# Debug level for troubleshooting
+LOG_LEVEL=DEBUG python -m odoo_mcp_server
+
+# Minimal logging
+LOG_LEVEL=WARNING python -m odoo_mcp_server
+```
+
 ### Usage with Claude Desktop
 
 Add this to your `claude_desktop_config.json`:

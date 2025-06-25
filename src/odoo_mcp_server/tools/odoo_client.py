@@ -94,15 +94,9 @@ class OdooClient:
 
     def _connect(self):
         """Initialize the OdooRPC connection and authenticate"""
-        logger.info(f"Connecting to Odoo at: {self.config.url}")
-        logger.info(f"  Hostname: {self.hostname}")
-        logger.info(
-            f"  Timeout: {self.config.timeout}s, Verify SSL: {self.config.verify_ssl}"
-        )
-        logger.info(
-            f"Authenticating with database: {self.config.db}, "
-            f"username: {self.config.username}"
-        )
+        logger.debug(f"Connecting to Odoo at: {self.config.url}")
+        logger.debug(f"Database: {self.config.db}, User: {self.config.username}")
+
         try:
             # Determine protocol and port based on URL scheme
             is_https = self.config.url.startswith("https://")
@@ -124,8 +118,11 @@ class OdooClient:
             user_records = user_model.search([("login", "=", self.config.username)])
             self.uid = user_records[0] if user_records else None
 
+            logger.info("✅ Successfully connected to Odoo")
+
         except (RPCError, InternalError, ConnectorError) as e:
-            logger.error(f"Error during connection: {str(e)}")
+            # Log connection errors as they're important for debugging
+            logger.error(f"🔴 Failed to connect to Odoo: {str(e)}")
 
             # Check specific error types and raise appropriate custom exceptions
             error_msg = str(e).lower()
@@ -178,7 +175,6 @@ class OdooClient:
                 },
             }
         except RPCError as e:
-            logger.error(f"RPC error getting models: {str(e)}")
             raise OdooRPCError(f"Failed to get models: {str(e)}") from e
 
     def get_model_info(self, model_name):
@@ -207,7 +203,6 @@ class OdooClient:
                 raise ModelNotFoundError(model_name)
             return result[0]
         except RPCError as e:
-            logger.error(f"RPC error getting model info: {str(e)}")
             raise OdooRPCError(f"Failed to get model info: {str(e)}") from e
 
     def get_model_fields(self, model_name):
@@ -234,7 +229,6 @@ class OdooClient:
                 raise ValueError(f"Failed to get fields for {model_name}")
             return fields
         except RPCError as e:
-            logger.error(f"RPC error getting model fields: {str(e)}")
             raise ValueError(f"Failed to get fields for {model_name}: {str(e)}") from e
 
     def search_models(self, query):
@@ -285,10 +279,8 @@ class OdooClient:
                 ],
             }
         except RPCError as e:
-            logger.error(f"RPC error searching models: {str(e)}")
             raise ValueError(f"RPC error searching models: {str(e)}") from e
         except InternalError as e:
-            logger.error(f"Internal error searching models: {str(e)}")
             raise ValueError(f"Internal error searching models: {str(e)}") from e
 
     # ============================================================================
@@ -335,7 +327,6 @@ class OdooClient:
                 raise ValueError("Failed to search record IDs")
             return result
         except RPCError as e:
-            logger.error(f"RPC error searching IDs: {str(e)}")
             raise ValueError(f"Failed to search record IDs: {str(e)}") from e
 
     def search_count(self, model_name, domain):
@@ -363,7 +354,6 @@ class OdooClient:
                 raise ValueError("Failed to count records")
             return result
         except RPCError as e:
-            logger.error(f"RPC error counting records: {str(e)}")
             raise ValueError(f"Failed to count records: {str(e)}") from e
 
     def search_read(
@@ -411,7 +401,6 @@ class OdooClient:
                 raise ValueError("Failed to search and read records")
             return result
         except RPCError as e:
-            logger.error(f"RPC error in search_read: {str(e)}")
             raise ValueError(f"Failed to search and read records: {str(e)}") from e
 
     def read_records(self, model_name, ids, fields=None):
@@ -445,7 +434,6 @@ class OdooClient:
                 raise ValueError("Failed to read records")
             return result
         except RPCError as e:
-            logger.error(f"RPC error reading records: {str(e)}")
             raise ValueError(f"Failed to read records: {str(e)}") from e
 
     # ============================================================================
@@ -477,7 +465,6 @@ class OdooClient:
                 raise ValueError("Failed to create record")
             return result
         except RPCError as e:
-            logger.error(f"RPC error creating record: {str(e)}")
             raise ValueError(f"Failed to create record: {str(e)}") from e
 
     def create_records(self, model_name, values_list):
@@ -507,7 +494,6 @@ class OdooClient:
                 raise ValueError("Failed to create records")
             return result
         except RPCError as e:
-            logger.error(f"RPC error creating records: {str(e)}")
             raise ValueError(f"Failed to create records: {str(e)}") from e
 
     def write_records(self, model_name, record_ids, values):
@@ -539,7 +525,6 @@ class OdooClient:
                 raise ValueError("Failed to write records")
             return result
         except RPCError as e:
-            logger.error(f"RPC error writing records: {str(e)}")
             raise ValueError(f"Failed to write records: {str(e)}") from e
 
     def unlink_records(self, model_name, record_ids):
@@ -568,7 +553,6 @@ class OdooClient:
                 raise ValueError("Failed to unlink records")
             return result
         except RPCError as e:
-            logger.error(f"RPC error unlinking records: {str(e)}")
             raise ValueError(f"Failed to unlink records: {str(e)}") from e
 
     def copy_record(self, model_name, record_id, default_values=None):
@@ -602,10 +586,8 @@ class OdooClient:
                 raise ValueError("Failed to copy record")
             return result.id
         except RPCError as e:
-            logger.error(f"RPC error copying record: {str(e)}")
             raise ValueError(f"RPC error copying record: {str(e)}") from e
         except InternalError as e:
-            logger.error(f"Internal error copying record: {str(e)}")
             raise ValueError(f"Internal error copying record: {str(e)}") from e
 
     # ============================================================================
@@ -636,10 +618,8 @@ class OdooClient:
             result = model_proxy.check_access_rights(operation, raise_exception)
             return result
         except RPCError as e:
-            logger.error(f"RPC error checking access rights: {str(e)}")
             raise ValueError(f"RPC error checking access rights: {str(e)}") from e
         except InternalError as e:
-            logger.error(f"Internal error checking access rights: {str(e)}")
             raise ValueError(f"Internal error checking access rights: {str(e)}") from e
 
     # ============================================================================
@@ -671,7 +651,6 @@ class OdooClient:
             }
             return server_info
         except RPCError as e:
-            logger.error(f"RPC error getting server info: {str(e)}")
             raise ValueError(f"Failed to get server info: {str(e)}") from e
 
     def get_user_info(self):
@@ -699,7 +678,6 @@ class OdooClient:
                     return result[0]
             raise ValueError("Failed to get user info")
         except RPCError as e:
-            logger.error(f"RPC error getting user info: {str(e)}")
             raise ValueError(f"Error getting user info: {str(e)}") from e
 
     def get_company_info(self):
@@ -742,7 +720,6 @@ class OdooClient:
                     return company_info[0]
             raise ValueError("Failed to get company info")
         except RPCError as e:
-            logger.error(f"RPC error getting company info: {str(e)}")
             raise ValueError(f"Error getting company info: {str(e)}") from e
 
     # ============================================================================
@@ -769,15 +746,12 @@ class OdooClient:
             method_func = getattr(model_proxy, method)
             return method_func(*args, **kwargs)
         except RPCError as e:
-            logger.error(f"RPC error executing {model}.{method}: {str(e)}")
             raise ValueError(f"RPC error executing {model}.{method}: {str(e)}") from e
         except InternalError as e:
-            logger.error(f"Internal error executing {model}.{method}: {str(e)}")
             raise ValueError(
                 f"Internal error executing {model}.{method}: {str(e)}"
             ) from e
         except AttributeError as e:
-            logger.error(f"Method {method} not found on model {model}: {str(e)}")
             raise ValueError(
                 f"Method {method} not found on model {model}: {str(e)}"
             ) from e
@@ -811,13 +785,10 @@ class OdooClient:
                 raise ValueError(f"Failed to call method {method_name}")
             return result
         except RPCError as e:
-            logger.error(f"RPC error calling {method_name}: {str(e)}")
             raise ValueError(f"RPC error calling {method_name}: {str(e)}") from e
         except InternalError as e:
-            logger.error(f"Internal error calling {method_name}: {str(e)}")
             raise ValueError(f"Internal error calling {method_name}: {str(e)}") from e
         except AttributeError as e:
-            logger.error(f"Method {method_name} not found: {str(e)}")
             raise ValueError(f"Method {method_name} not found: {str(e)}") from e
 
 

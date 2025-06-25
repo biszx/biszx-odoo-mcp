@@ -28,7 +28,7 @@ class Config:
         self.__dict__.update(self.load_config())
         self.url = self._prepare_url(self.url)
 
-        logger.info("Odoo client configuration:")
+        logger.info("🔧 Odoo client configuration:")
         logger.info(f"  URL: {self.url}")
         logger.info(f"  Database: {self.db}")
         logger.info(f"  Username: {self.username}")

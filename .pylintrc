@@ -13,4 +13,4 @@ output-format=colorized
 reports=n
 
 [MESSAGES CONTROL]
-disable=broad-exception-caught
+disable=invalid-name

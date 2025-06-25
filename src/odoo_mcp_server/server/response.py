@@ -10,10 +10,6 @@ class Response:
     Standard response wrapper for OdooClient methods.
     """
 
-    success: bool
-    data: dict | None
-    error: str | None
-
     def __init__(self, data=None, error=None):
         self.data = data
         self.error = error

@@ -48,6 +48,7 @@ The project follows a modular structure, with separate directories for different
 
 # Critical Instructions
 
+- Before running `uv run`, activate the virtual environment using `source .venv/bin/activate.fish`.
 - Use `uv run` to execute lintering and formatting tools like Flake 8, Pylint, and Ruff.
 - Use `uv run` to execute tests and ensure all tests pass before submitting changes.
 - Always ensure that the code is well-documented and follows the project's coding standards.

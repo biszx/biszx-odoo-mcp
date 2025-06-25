@@ -20,6 +20,7 @@ authors = [
     {name = "Biszx", email = "isares.br@gmail.com"}
 ]
 dependencies = [
+    "asyncio>=3.4.3",
     "loguru>=0.7.3",
     "mcp[cli]>=1.9.4",
     "odoorpc>=0.10.1",
@@ -44,5 +45,6 @@ dev = [
     "flake8>=7.3.0",
     "pre-commit>=4.2.0",
     "pylint>=3.3.7",
+    "pytest-asyncio>=1.0.0",
     "ruff>=0.12.0",
 ]

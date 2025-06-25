@@ -6,6 +6,8 @@ import os
 import sys
 import traceback
 
+from loguru import logger
+
 from .exceptions import OdooMCPError
 from .main import mcp
 
@@ -14,50 +16,78 @@ def main() -> int:
     """
     Run the MCP server
     """
+    # Configure beautiful loguru formatting
+    logger.remove()  # Remove default handler
+    logger.add(
+        sys.stderr,
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
+        level="INFO",
+        colorize=True,
+    )
+
     try:
-        print("=== ODOO MCP SERVER STARTING ===", file=sys.stderr)
-        print(f"Python version: {sys.version}", file=sys.stderr)
-        print("Environment variables:", file=sys.stderr)
-        for key, value in os.environ.items():
-            if key.startswith("ODOO_"):
+        logger.info("🚀 Odoo MCP Server Starting")
+        logger.info(f"🐍 Python version: {sys.version.split()[0]}")
+
+        # Log environment variables in a structured way
+        odoo_vars = {k: v for k, v in os.environ.items() if k.startswith("ODOO_")}
+        if odoo_vars:
+            logger.info("🔧 Environment Configuration:")
+            for key, value in odoo_vars.items():
                 if key == "ODOO_PASSWORD":
-                    print(f"  {key}: ***hidden***", file=sys.stderr)
+                    logger.info(f"   • {key}: {'*' * 8}")
                 else:
-                    print(f"  {key}: {value}", file=sys.stderr)
+                    logger.info(f"   • {key}: {value}")
+        else:
+            logger.warning("⚠️  No ODOO_ environment variables found")
 
-        # Check if server instance has the run_stdio method
+        # Check server capabilities
         methods = [method for method in dir(mcp) if not method.startswith("_")]
-        print(f"Available methods on mcp object: {methods}", file=sys.stderr)
+        methods_preview = ", ".join(methods[:5])
+        methods_suffix = "..." if len(methods) > 5 else ""
+        logger.info(f"🔍 MCP server capabilities: {methods_preview}{methods_suffix}")
+        logger.debug(f"All available methods: {methods}")
 
-        print("Starting MCP server with run() method...", file=sys.stderr)
+        logger.info("▶️  Starting MCP server...")
         sys.stderr.flush()  # Ensure log information is written immediately
 
         # Use the run() method directly
         mcp.run()
 
         # If execution reaches here, the server exited normally
-        print("MCP server stopped normally", file=sys.stderr)
+        logger.success("✅ MCP server stopped normally")
         return 0
     except KeyboardInterrupt:
-        print("MCP server stopped by user", file=sys.stderr)
+        logger.info("⏹️  MCP server stopped by user")
         return 0
     except OdooMCPError as e:
-        print(f"Odoo MCP Error starting server: {e}", file=sys.stderr)
-        print("Error details:", file=sys.stderr)
-        print(f"  Type: {e.__class__.__name__}", file=sys.stderr)
-        print(f"  Code: {e.error_code}", file=sys.stderr)
+        logger.error("❌ Odoo MCP Error occurred")
+        logger.error(f"   └─ Error: {e}")
+        logger.error(f"   └─ Type: {e.__class__.__name__}")
+        logger.error(f"   └─ Code: {e.error_code}")
         if e.details:
-            print(f"  Details: {e.details}", file=sys.stderr)
+            logger.error(f"   └─ Details: {e.details}")
         return 1
     except Exception as e:  # pylint: disable=broad-exception-caught
         # Justification: Top-level catch-all to ensure server errors are logged.
         # Prevents silent crashes.
-        print(f"Error starting server: {e}", file=sys.stderr)
-        print("Exception details:", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
-        print("\nServer object information:", file=sys.stderr)
-        print(f"MCP object type: {type(mcp)}", file=sys.stderr)
-        print(f"MCP object dir: {dir(mcp)}", file=sys.stderr)
+        logger.critical("💥 Critical error starting server")
+        logger.error(f"   └─ Error: {e}")
+        logger.error("   └─ Exception details:")
+        for line in traceback.format_exc().strip().split("\n"):
+            logger.error(f"      {line}")
+        logger.error("   └─ Server object information:")
+        logger.error(f"      Type: {type(mcp)}")
+        try:
+            methods = dir(mcp)
+            logger.error(f"      Methods: {methods}")
+        except Exception as dir_error:
+            logger.error(f"      Methods: <Error getting methods: {dir_error}>")
         return 1
 
 

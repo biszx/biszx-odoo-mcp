@@ -269,7 +269,7 @@ Odoo uses domain syntax for filtering records. Here are common patterns:
 
 The server supports configurable logging levels via the `LOG_LEVEL` environment variable:
 
-- `INFO` (default): Shows essential operational information with friendly emojis
+- `INFO` (default): Shows essential operational information
 - `DEBUG`: Shows detailed debugging information including connection details and environment variables
 - `WARNING`: Shows only warnings and errors
 - `ERROR`: Shows only error messages
@@ -277,7 +277,7 @@ The server supports configurable logging levels via the `LOG_LEVEL` environment 
 Example usage:
 
 ```bash
-# Default info level with friendly emojis
+# Default info level
 python -m odoo_mcp_server
 
 # Debug level for troubleshooting

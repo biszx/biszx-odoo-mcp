@@ -5,7 +5,6 @@ Odoo Configuration for MCP server integration
 import os
 import re
 
-from dotenv import load_dotenv
 from loguru import logger
 
 
@@ -45,7 +44,6 @@ class Config:
             dict: Configuration parameters for Odoo client
         """
 
-        load_dotenv()
         self._validate_config()
         return {
             "url": os.environ["ODOO_URL"],

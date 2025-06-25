@@ -2,36 +2,18 @@
 Command line entry point for the Odoo MCP Server
 """
 
-import os
 import sys
 
 from loguru import logger
 
-from .exceptions import OdooMCPError
-from .main import mcp
+from odoo_mcp_server.exceptions import OdooMCPError
+from odoo_mcp_server.main import mcp
 
 
 def main() -> int:
     """
     Run the MCP server
     """
-    # Configure loguru with appropriate log level
-    logger.remove()  # Remove default handler
-
-    # Determine log level from environment
-    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
-
-    logger.add(
-        sys.stderr,
-        format=(
-            "<green>{time:HH:mm:ss}</green> | "
-            "<level>{level: <8}</level> | "
-            "<level>{message}</level>"
-        ),
-        level=log_level,
-        colorize=True,
-    )
-
     try:
         logger.info("🚀 Odoo MCP Server starting")
 
@@ -39,7 +21,7 @@ def main() -> int:
         logger.debug(f"Python version: {sys.version.split()[0]}")
         logger.debug("MCP server initialized with tools and resources")
 
-        logger.info("▶️ Starting MCP server...")
+        logger.info("▶️  Starting MCP server...")
 
         # Use the run() method directly
         mcp.run()

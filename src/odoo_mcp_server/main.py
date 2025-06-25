@@ -5,14 +5,41 @@ Provides MCP tools and resources for interacting with Odoo ERP systems
 """
 
 import inspect
+import os
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from loguru import logger
 from mcp.server.fastmcp import FastMCP
 
 from odoo_mcp_server.mcp import resources, tools
 from odoo_mcp_server.mcp.context import AppContext
 from odoo_mcp_server.tools.odoo_client import get_odoo_client
+
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
+
+# Configure loguru with appropriate log level
+logger.remove()  # Remove default handler
+
+# Determine log level from environment
+log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+
+logger.add(
+    sys.stderr,
+    format=(
+        "<green>{time:HH:mm:ss}</green> | "
+        "<level>{level: <8}</level> | "
+        "<level>{message}</level>"
+    ),
+    level=log_level,
+    colorize=True,
+)
 
 
 @asynccontextmanager

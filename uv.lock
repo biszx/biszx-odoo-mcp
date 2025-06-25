@@ -384,7 +384,6 @@ dependencies = [
     { name = "odoorpc" },
     { name = "pytest" },
     { name = "pytest-cov" },
-    { name = "python-dotenv" },
 ]
 
 [package.dev-dependencies]
@@ -393,6 +392,7 @@ dev = [
     { name = "pre-commit" },
     { name = "pylint" },
     { name = "pytest-asyncio" },
+    { name = "python-dotenv" },
     { name = "ruff" },
 ]
 
@@ -404,7 +404,6 @@ requires-dist = [
     { name = "odoorpc", specifier = ">=0.10.1" },
     { name = "pytest", specifier = ">=8.4.1" },
     { name = "pytest-cov", specifier = ">=6.2.1" },
-    { name = "python-dotenv", specifier = ">=1.1.1" },
 ]
 
 [package.metadata.requires-dev]
@@ -413,6 +412,7 @@ dev = [
     { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "pylint", specifier = ">=3.3.7" },
     { name = "pytest-asyncio", specifier = ">=1.0.0" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "ruff", specifier = ">=0.12.0" },
 ]
 

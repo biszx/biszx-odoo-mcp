@@ -30,12 +30,6 @@ dependencies = [
 Homepage = "https://github.com/isares-br/odoo-mcp-server"
 Issues = "https://github.com/isares-br/odoo-mcp-server/issues"
 
-[project.optional-dependencies]
-dev = [
-    "pre-commit",
-    "ruff",
-]
-
 [project.scripts]
 odoo-mcp = "odoo_mcp_server.__main__:main"
 
@@ -45,5 +39,8 @@ packages = ["odoo_mcp_server"]
 
 [dependency-groups]
 dev = [
+    "flake8>=7.3.0",
     "pre-commit>=4.2.0",
+    "pylint>=3.3.7",
+    "ruff>=0.12.0",
 ]

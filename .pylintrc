@@ -4,6 +4,8 @@ score=y
 [DESIGN]
 max-args=9
 max-attributes=10
+max-positional-arguments=10
+min-public-methods=1
 
 [REPORTS]
 msg-template={path}:{line}: [{msg_id}({symbol}), {obj}] {msg}

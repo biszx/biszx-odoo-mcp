@@ -40,7 +40,9 @@ def main() -> int:
     except KeyboardInterrupt:
         print("MCP server stopped by user", file=sys.stderr)
         return 0
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        # Justification: Top-level catch-all to ensure server errors are logged.
+        # Prevents silent crashes.
         print(f"Error starting server: {e}", file=sys.stderr)
         print("Exception details:", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)

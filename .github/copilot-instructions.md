@@ -35,7 +35,7 @@ The project follows a modular structure, with separate directories for different
 - **Code Style**: Follow Flake 8, Pylint, and Ruff guidelines for Python code.
 - **Typing**: Use type hints to improve code readability and maintainability.
 - **Documentation**: Always document your code using docstrings, comments and README files.
-- **Testing**: Write unit tests for your code using `pytest` with 100% line coverage.
+- **Testing**: Write unit tests for your code using `pytest` with 100% line coverage with `pytest-cov`.
 
 ## AI Steps Rules
 

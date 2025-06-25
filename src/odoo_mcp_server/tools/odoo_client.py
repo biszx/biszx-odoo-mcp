@@ -49,6 +49,14 @@ from loguru import logger
 from odoorpc.error import InternalError, RPCError
 from odoorpc.rpc.error import ConnectorError
 
+from odoo_mcp_server.exceptions import (
+    AuthenticationError,
+    ConnectionTimeoutError,
+    InternalServerError,
+    InvalidDataError,
+    ModelNotFoundError,
+    OdooRPCError,
+)
 from odoo_mcp_server.tools.config import Config
 
 
@@ -81,7 +89,7 @@ class OdooClient:
     def _ensure_connected(self) -> odoorpc.ODOO:
         """Ensure we have a valid connection"""
         if self.odoo is None:
-            raise InternalError("Not connected to Odoo")
+            raise InternalServerError("Not connected to Odoo")
         return self.odoo
 
     def _connect(self):
@@ -116,15 +124,24 @@ class OdooClient:
             user_records = user_model.search([("login", "=", self.config.username)])
             self.uid = user_records[0] if user_records else None
 
-        except RPCError as e:
-            logger.error(f"RPC error during authentication: {str(e)}")
-            raise ValueError(f"Failed to authenticate with Odoo: {str(e)}") from e
-        except InternalError as e:
-            logger.error(f"Internal error during connection: {str(e)}")
-            raise ValueError(f"Failed to connect to Odoo: {str(e)}") from e
-        except ConnectorError as e:
-            logger.error(f"Connector error: {str(e)}")
-            raise ValueError(f"Failed to establish connection: {str(e)}") from e
+        except (RPCError, InternalError, ConnectorError) as e:
+            logger.error(f"Error during connection: {str(e)}")
+
+            # Check specific error types and raise appropriate custom exceptions
+            error_msg = str(e).lower()
+            if isinstance(e, RPCError):
+                if "access" in error_msg or "denied" in error_msg:
+                    raise AuthenticationError(
+                        f"Authentication failed: {str(e)}",
+                        username=self.config.username,
+                        database=self.config.db,
+                    ) from e
+                raise OdooRPCError(f"RPC error: {str(e)}") from e
+            if isinstance(e, ConnectorError):
+                raise ConnectionTimeoutError(
+                    f"Connection failed: {str(e)}", timeout=self.config.timeout
+                ) from e
+            raise InternalServerError(f"Internal error: {str(e)}") from e
 
     # ============================================================================
     # MODEL INTROSPECTION
@@ -151,7 +168,7 @@ class OdooClient:
             model_records = IrModel.search_read([], ["model", "name"])
 
             if not model_records:
-                raise ValueError("No models found")
+                raise InvalidDataError("No models found in the system")
 
             models = sorted([rec["model"] for rec in model_records])
             return {
@@ -162,7 +179,7 @@ class OdooClient:
             }
         except RPCError as e:
             logger.error(f"RPC error getting models: {str(e)}")
-            raise ValueError(f"Failed to get models: {str(e)}") from e
+            raise OdooRPCError(f"Failed to get models: {str(e)}") from e
 
     def get_model_info(self, model_name):
         """
@@ -187,11 +204,11 @@ class OdooClient:
                 [("model", "=", model_name)], ["name", "model"]
             )
             if not result:
-                raise ValueError(f"Model {model_name} not found")
+                raise ModelNotFoundError(model_name)
             return result[0]
         except RPCError as e:
             logger.error(f"RPC error getting model info: {str(e)}")
-            raise ValueError(f"Failed to get model info: {str(e)}") from e
+            raise OdooRPCError(f"Failed to get model info: {str(e)}") from e
 
     def get_model_fields(self, model_name):
         """

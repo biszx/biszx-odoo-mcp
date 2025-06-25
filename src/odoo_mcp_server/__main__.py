@@ -6,6 +6,7 @@ import os
 import sys
 import traceback
 
+from .exceptions import OdooMCPError
 from .main import mcp
 
 
@@ -40,6 +41,14 @@ def main() -> int:
     except KeyboardInterrupt:
         print("MCP server stopped by user", file=sys.stderr)
         return 0
+    except OdooMCPError as e:
+        print(f"Odoo MCP Error starting server: {e}", file=sys.stderr)
+        print("Error details:", file=sys.stderr)
+        print(f"  Type: {e.__class__.__name__}", file=sys.stderr)
+        print(f"  Code: {e.error_code}", file=sys.stderr)
+        if e.details:
+            print(f"  Details: {e.details}", file=sys.stderr)
+        return 1
     except Exception as e:  # pylint: disable=broad-exception-caught
         # Justification: Top-level catch-all to ensure server errors are logged.
         # Prevents silent crashes.

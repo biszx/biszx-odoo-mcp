@@ -11,7 +11,8 @@ An MCP server implementation that integrates with Odoo ERP systems, enabling AI 
 - **Resource System**: URI-based access to Odoo data structures and documentation
 - **XML-RPC Communication**: Secure connection to Odoo instances via XML-RPC
 - **Flexible Configuration**: Support for config files and environment variables
-- **Error Handling**: Clear error messages for common Odoo API issues
+- **Error Handling**: Comprehensive custom exception system with detailed error context
+- **Exception Hierarchy**: Structured exception classes for better error handling and debugging
 - **Comprehensive Testing**: Full test coverage with pytest
 
 ## Tools
@@ -367,6 +368,66 @@ When using the MCP tools for Odoo, pay attention to these parameter formatting g
 2. **Fields Parameter**:
    - Should be an array of field names: `["name", "email", "phone"]`
    - The server will try to parse string inputs as JSON
+
+## Exception System
+
+The Odoo MCP Server features a comprehensive custom exception system that provides detailed error context and facilitates better debugging and error handling.
+
+### Exception Hierarchy
+
+```
+OdooMCPError (Base)
+├── ConnectionError
+│   ├── ConnectionTimeoutError
+│   ├── AuthenticationError
+│   └── SSLVerificationError
+├── ModelError
+│   ├── ModelNotFoundError
+│   ├── FieldNotFoundError
+│   └── InvalidModelError
+├── DataError
+│   ├── RecordNotFoundError
+│   ├── ValidationError
+│   ├── AccessDeniedError
+│   └── InvalidDataError
+├── ServerError
+│   ├── OdooRPCError
+│   ├── InternalServerError
+│   └── ConfigurationError
+└── MCPError
+    ├── ResourceError
+    ├── ToolError
+    └── ContextError
+```
+
+### Key Exception Features
+
+- **Structured Error Information**: Each exception includes error codes, detailed messages, and contextual data
+- **JSON Serialization**: All exceptions can be converted to JSON format for easy transmission
+- **Exception Chaining**: Original exceptions are preserved while adding custom context
+- **Automatic Error Wrapping**: Common Python exceptions are automatically wrapped with appropriate custom exceptions
+
+### Example Exception Usage
+
+```python
+try:
+    # Odoo operation that might fail
+    result = odoo_client.get_model_info("nonexistent.model")
+except ModelNotFoundError as e:
+    print(f"Model error: {e.message}")
+    print(f"Error code: {e.error_code}")
+    print(f"Model name: {e.details['model_name']}")
+
+    # Convert to JSON for API responses
+    error_response = e.to_dict()
+```
+
+### Error Handling Best Practices
+
+1. **Catch Specific Exceptions**: Use specific exception types rather than generic `Exception`
+2. **Preserve Context**: Use the `details` parameter to add relevant context information
+3. **Chain Exceptions**: Use `from` keyword to preserve original exception information
+4. **Use Error Codes**: Leverage error codes for programmatic error handling
 
 ## License
 

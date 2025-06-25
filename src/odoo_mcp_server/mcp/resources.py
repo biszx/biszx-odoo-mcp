@@ -6,6 +6,7 @@ This module contains all the MCP resource functions for Odoo data access.
 
 from typing import cast
 
+from odoo_mcp_server.exceptions import OdooMCPError, ResourceError
 from odoo_mcp_server.mcp.context import AppContext
 from odoo_mcp_server.server.response import Response
 
@@ -24,8 +25,15 @@ async def get_models_resource(mcp) -> str:
     try:
         data = app_context.odoo.get_models()
         return Response(data=data).to_json_string()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_json_string()
     except Exception as e:
-        return Response(error=str(e)).to_json_string()
+        resource_error = ResourceError(
+            f"Unexpected error getting models: {str(e)}",
+            resource_name="get_models_resource",
+            original_error=e,
+        )
+        return Response(error=resource_error.to_dict()).to_json_string()
 
 
 async def get_model_fields_resource(mcp, model_name: str) -> str:
@@ -45,8 +53,16 @@ async def get_model_fields_resource(mcp, model_name: str) -> str:
     try:
         data = app_context.odoo.get_model_fields(model_name)
         return Response(data=data).to_json_string()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_json_string()
     except Exception as e:
-        return Response(error=str(e)).to_json_string()
+        resource_error = ResourceError(
+            f"Unexpected error getting model fields: {str(e)}",
+            resource_name="get_model_fields_resource",
+            details={"model_name": model_name},
+            original_error=e,
+        )
+        return Response(error=resource_error.to_dict()).to_json_string()
 
 
 async def get_model_info_resource(mcp, model_name: str) -> str:
@@ -66,8 +82,16 @@ async def get_model_info_resource(mcp, model_name: str) -> str:
     try:
         data = app_context.odoo.get_model_info(model_name)
         return Response(data=data).to_json_string()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_json_string()
     except Exception as e:
-        return Response(error=str(e)).to_json_string()
+        resource_error = ResourceError(
+            f"Unexpected error getting model info: {str(e)}",
+            resource_name="get_model_info_resource",
+            details={"model_name": model_name},
+            original_error=e,
+        )
+        return Response(error=resource_error.to_dict()).to_json_string()
 
 
 async def get_domain_help_resource() -> str:
@@ -219,5 +243,13 @@ async def search_models_resource(mcp, query: str) -> str:
     try:
         data = app_context.odoo.search_models(query)
         return Response(data=data).to_json_string()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_json_string()
     except Exception as e:
-        return Response(error=str(e)).to_json_string()
+        resource_error = ResourceError(
+            f"Unexpected error searching models: {str(e)}",
+            resource_name="search_models_resource",
+            details={"query": query},
+            original_error=e,
+        )
+        return Response(error=resource_error.to_dict()).to_json_string()

@@ -6,6 +6,7 @@ This module contains all the MCP tool functions for interacting with Odoo.
 
 from typing import cast
 
+from odoo_mcp_server.exceptions import OdooMCPError, ToolError
 from odoo_mcp_server.mcp.context import AppContext
 from odoo_mcp_server.server.response import Response
 
@@ -24,8 +25,15 @@ async def get_odoo_models(mcp) -> dict:
     try:
         data = app_context.odoo.get_models()
         return Response(data=data).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
     except Exception as e:
-        return Response(error=str(e)).to_dict()
+        tool_error = ToolError(
+            f"Unexpected error getting models: {str(e)}",
+            tool_name="get_odoo_models",
+            original_error=e,
+        )
+        return Response(error=tool_error.to_dict()).to_dict()
 
 
 async def get_model_info(mcp, model_name: str) -> dict:
@@ -45,8 +53,16 @@ async def get_model_info(mcp, model_name: str) -> dict:
     try:
         data = app_context.odoo.get_model_info(model_name)
         return Response(data=data).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
     except Exception as e:
-        return Response(error=str(e)).to_dict()
+        tool_error = ToolError(
+            f"Unexpected error getting model info: {str(e)}",
+            tool_name="get_model_info",
+            details={"model_name": model_name},
+            original_error=e,
+        )
+        return Response(error=tool_error.to_dict()).to_dict()
 
 
 async def get_model_fields(mcp, model_name: str) -> dict:
@@ -66,8 +82,16 @@ async def get_model_fields(mcp, model_name: str) -> dict:
     try:
         data = app_context.odoo.get_model_fields(model_name)
         return Response(data=data).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
     except Exception as e:
-        return Response(error=str(e)).to_dict()
+        tool_error = ToolError(
+            f"Unexpected error getting model fields: {str(e)}",
+            tool_name="get_model_fields",
+            details={"model_name": model_name},
+            original_error=e,
+        )
+        return Response(error=tool_error.to_dict()).to_dict()
 
 
 async def search_records(

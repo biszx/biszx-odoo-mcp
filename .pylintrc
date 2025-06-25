@@ -1,6 +1,10 @@
 [MASTER]
 score=y
 
+[DESIGN]
+max-args=9
+max-attributes=10
+
 [REPORTS]
 msg-template={path}:{line}: [{msg_id}({symbol}), {obj}] {msg}
 output-format=colorized

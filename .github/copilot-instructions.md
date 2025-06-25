@@ -30,13 +30,14 @@ The project follows a modular structure, with separate directories for different
 
 # Following Rules
 
-## Coding
+## Coding Rules
 
 - **Code Style**: Follow Flake 8, Pylint, and Ruff guidelines for Python code.
+- **Typing**: Use type hints to improve code readability and maintainability.
 - **Documentation**: Always document your code using docstrings, comments and README files.
 - **Testing**: Write unit tests for your code using `pytest` with 100% line coverage.
 
-## AI Steps
+## AI Steps Rules
 
 1. **Understanding the Code**: Analyze the existing codebase to understand its structure and functionality.
 2. **Identifying Areas for Improvement**: Look for code smells, inefficiencies, or areas lacking test coverage.

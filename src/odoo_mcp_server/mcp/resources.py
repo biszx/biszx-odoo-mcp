@@ -4,23 +4,10 @@ MCP Resources for Odoo integration
 This module contains all the MCP resource functions for Odoo data access.
 """
 
-import json
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
+from odoo_mcp_server.mcp.context import AppContext
 from odoo_mcp_server.server.response import Response
-
-if TYPE_CHECKING:
-    from odoo_mcp_server.tools.odoo_client import OdooClient
-
-
-@dataclass
-class AppContext:
-    """
-    Application context for the MCP server
-    """
-
-    odoo: "OdooClient"
 
 
 async def get_models_resource(mcp) -> str:
@@ -36,11 +23,9 @@ async def get_models_resource(mcp) -> str:
 
     try:
         data = app_context.odoo.get_models()
-        response = Response(data=data)
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(data=data).to_json_string()
     except Exception as e:
-        response = Response(error=str(e))
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(error=str(e)).to_json_string()
 
 
 async def get_model_fields_resource(mcp, model_name: str) -> str:
@@ -59,11 +44,9 @@ async def get_model_fields_resource(mcp, model_name: str) -> str:
 
     try:
         data = app_context.odoo.get_model_fields(model_name)
-        response = Response(data=data)
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(data=data).to_json_string()
     except Exception as e:
-        response = Response(error=str(e))
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(error=str(e)).to_json_string()
 
 
 async def get_model_info_resource(mcp, model_name: str) -> str:
@@ -82,11 +65,9 @@ async def get_model_info_resource(mcp, model_name: str) -> str:
 
     try:
         data = app_context.odoo.get_model_info(model_name)
-        response = Response(data=data)
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(data=data).to_json_string()
     except Exception as e:
-        response = Response(error=str(e))
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(error=str(e)).to_json_string()
 
 
 async def get_domain_help_resource() -> str:
@@ -148,7 +129,7 @@ async def get_domain_help_resource() -> str:
     }
 
     response = Response(data=domain_help)
-    return json.dumps(response.to_dict(), indent=2)
+    return response.to_json_string()
 
 
 async def get_operations_help_resource() -> str:
@@ -215,7 +196,7 @@ async def get_operations_help_resource() -> str:
     }
 
     response = Response(data=operations_help)
-    return json.dumps(response.to_dict(), indent=2)
+    return response.to_json_string()
 
 
 async def search_models_resource(mcp, query: str) -> str:
@@ -237,8 +218,6 @@ async def search_models_resource(mcp, query: str) -> str:
 
     try:
         data = app_context.odoo.search_models(query)
-        response = Response(data=data)
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(data=data).to_json_string()
     except Exception as e:
-        response = Response(error=str(e))
-        return json.dumps(response.to_dict(), indent=2)
+        return Response(error=str(e)).to_json_string()

@@ -6,21 +6,12 @@ Provides MCP tools and resources for interacting with Odoo ERP systems
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 
 from mcp.server.fastmcp import FastMCP
 
 from odoo_mcp_server.mcp import resources, tools
-from odoo_mcp_server.tools.odoo_client import OdooClient, get_odoo_client
-
-
-@dataclass
-class AppContext:
-    """
-    Application context for the MCP server
-    """
-
-    odoo: OdooClient
+from odoo_mcp_server.mcp.context import AppContext
+from odoo_mcp_server.tools.odoo_client import get_odoo_client
 
 
 @asynccontextmanager

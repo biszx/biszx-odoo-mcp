@@ -4,38 +4,10 @@ MCP Tools for Odoo integration
 This module contains all the MCP tool functions for interacting with Odoo.
 """
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
+from odoo_mcp_server.mcp.context import AppContext
 from odoo_mcp_server.server.response import Response
-
-if TYPE_CHECKING:
-    from odoo_mcp_server.tools.odoo_client import OdooClient
-
-
-@dataclass
-class AppContext:
-    """
-    Application context for the MCP server
-    """
-
-    odoo: "OdooClient"
-
-
-# Helper function to convert raw data to Response format for MCP tools
-def handle_response(data=None, error=None):
-    """
-    Convert raw data to Response format for MCP tools.
-
-    Args:
-        data: Raw data from odoo_client
-        error: Error message if any
-
-    Returns:
-        Dictionary representation of the response
-    """
-    response = Response(data=data, error=error)
-    return response.to_dict()
 
 
 async def get_odoo_models(mcp) -> dict:
@@ -51,9 +23,9 @@ async def get_odoo_models(mcp) -> dict:
 
     try:
         data = app_context.odoo.get_models()
-        return handle_response(data=data)
+        return Response(data=data).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def get_model_info(mcp, model_name: str) -> dict:
@@ -72,9 +44,9 @@ async def get_model_info(mcp, model_name: str) -> dict:
 
     try:
         data = app_context.odoo.get_model_info(model_name)
-        return handle_response(data=data)
+        return Response(data=data).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def get_model_fields(mcp, model_name: str) -> dict:
@@ -93,9 +65,9 @@ async def get_model_fields(mcp, model_name: str) -> dict:
 
     try:
         data = app_context.odoo.get_model_fields(model_name)
-        return handle_response(data=data)
+        return Response(data=data).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def search_records(
@@ -129,9 +101,9 @@ async def search_records(
         data = app_context.odoo.search_read(
             model_name, domain, fields=fields, limit=limit, offset=offset, order=order
         )
-        return handle_response(data=data)
+        return Response(data=data).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def read_records(
@@ -157,9 +129,9 @@ async def read_records(
 
     try:
         data = app_context.odoo.read_records(model_name, ids, fields=fields)
-        return handle_response(data=data)
+        return Response(data=data).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def create_record(
@@ -183,9 +155,9 @@ async def create_record(
 
     try:
         record_id = app_context.odoo.create_record(model_name, values)
-        return handle_response(data={"id": record_id})
+        return Response(data={"id": record_id}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def create_records(
@@ -209,9 +181,9 @@ async def create_records(
 
     try:
         record_ids = app_context.odoo.create_records(model_name, values_list)
-        return handle_response(data={"ids": record_ids})
+        return Response(data={"ids": record_ids}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def write_record(
@@ -237,9 +209,9 @@ async def write_record(
 
     try:
         result = app_context.odoo.write_records(model_name, [record_id], values)
-        return handle_response(data={"success": result})
+        return Response(data={"success": result}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def write_records(
@@ -265,9 +237,9 @@ async def write_records(
 
     try:
         result = app_context.odoo.write_records(model_name, record_ids, values)
-        return handle_response(data={"success": result})
+        return Response(data={"success": result}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def unlink_record(
@@ -291,9 +263,9 @@ async def unlink_record(
 
     try:
         result = app_context.odoo.unlink_records(model_name, [record_id])
-        return handle_response(data={"success": result})
+        return Response(data={"success": result}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def unlink_records(
@@ -317,9 +289,9 @@ async def unlink_records(
 
     try:
         result = app_context.odoo.unlink_records(model_name, record_ids)
-        return handle_response(data={"success": result})
+        return Response(data={"success": result}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def search_count(
@@ -343,9 +315,9 @@ async def search_count(
 
     try:
         count = app_context.odoo.search_count(model_name, domain)
-        return handle_response(data={"count": count})
+        return Response(data={"count": count}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def search_ids(
@@ -377,9 +349,9 @@ async def search_ids(
         ids = app_context.odoo.search_ids(
             model_name, domain, offset=offset, limit=limit, order=order
         )
-        return handle_response(data={"ids": ids})
+        return Response(data={"ids": ids}).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def call_method(
@@ -412,9 +384,9 @@ async def call_method(
 
     try:
         result = app_context.odoo.call_method(model_name, method_name, args, kwargs)
-        return handle_response(result)
+        return Response(data=result).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 # Additional utility tools for better Odoo integration
@@ -444,15 +416,15 @@ async def bulk_operation(
     try:
         if operation == "create":
             result = app_context.odoo.create_records(model_name, data)
-            return handle_response(data={"ids": result})
+            return Response(data={"ids": result}).to_dict()
         if operation == "unlink":
             # For unlink, data should be list of IDs
             ids = [item["id"] if isinstance(item, dict) else item for item in data]
             result = app_context.odoo.unlink_records(model_name, ids)
-            return handle_response(data={"success": result})
-        return handle_response(error=f"Unsupported bulk operation: {operation}")
+            return Response(data={"success": result}).to_dict()
+        return Response(error=f"Unsupported bulk operation: {operation}").to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()
 
 
 async def search_and_update(
@@ -480,19 +452,19 @@ async def search_and_update(
         # First search for IDs
         record_ids = app_context.odoo.search_ids(model_name, domain)
         if not record_ids:
-            return handle_response(
+            return Response(
                 data={"affected_records": 0, "message": "No records found"}
-            )
+            ).to_dict()
 
         # Then update the found records
         result = app_context.odoo.write_records(model_name, record_ids, values)
-        return handle_response(
+        return Response(
             data={
                 "affected_records": len(record_ids),
                 "record_ids": record_ids,
                 "updated": result,
                 "update_result": result,  # For backward compatibility
             }
-        )
+        ).to_dict()
     except Exception as e:
-        return handle_response(error=str(e))
+        return Response(error=str(e)).to_dict()

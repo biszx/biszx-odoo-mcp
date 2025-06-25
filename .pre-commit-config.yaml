@@ -33,6 +33,3 @@ repos:
         entry: pylint
         language: system
         types: [python]
-        args: [
-            "--rcfile=.pylintrc", # Link to your config file
-          ]

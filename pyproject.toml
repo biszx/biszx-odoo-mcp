@@ -42,3 +42,8 @@ odoo-mcp = "odoo_mcp_server.__main__:main"
 [tool.setuptools]
 package-dir = {"" = "src"}
 packages = ["odoo_mcp_server"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+]

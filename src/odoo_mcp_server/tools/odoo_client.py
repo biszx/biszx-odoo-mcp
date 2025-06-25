@@ -101,10 +101,10 @@ class OdooClient:
         """
         model_ids = self._execute("ir.model", "search", [])
         if not model_ids:
-            return Response(error="No models found").to_dict()
+            return Response(error="No models found")
         result = self._execute("ir.model", "read", model_ids, ["model", "name"])
         if result is None:
-            return Response(error="Failed to read models").to_dict()
+            return Response(error="Failed to read models")
         models = sorted([rec["model"] for rec in result])
         models_info = {
             "model_names": models,
@@ -112,7 +112,7 @@ class OdooClient:
                 rec["model"]: {"name": rec.get("name", "")} for rec in result
             },
         }
-        return Response(data=models_info).to_dict()
+        return Response(data=models_info)
 
     def get_model_info(self, model_name):
         """
@@ -137,8 +137,8 @@ class OdooClient:
             {"fields": ["name", "model"]},
         )
         if not result:
-            return Response(error=f"Model {model_name} not found").to_dict()
-        return Response(data=result[0]).to_dict()
+            return Response(error=f"Model {model_name} not found")
+        return Response(data=result[0])
 
     def get_model_fields(self, model_name):
         """
@@ -158,8 +158,8 @@ class OdooClient:
         """
         fields = self._execute(model_name, "fields_get")
         if fields is None:
-            return Response(error=f"Failed to get fields for {model_name}").to_dict()
-        return Response(data=fields).to_dict()
+            return Response(error=f"Failed to get fields for {model_name}")
+        return Response(data=fields)
 
     def search_read(
         self, model_name, domain, fields=None, offset=None, limit=None, order=None
@@ -197,8 +197,8 @@ class OdooClient:
             kwargs["order"] = order
         result = self._execute(model_name, "search_read", domain, kwargs)
         if result is None:
-            return Response(error="Failed to search and read records").to_dict()
-        return Response(data=result).to_dict()
+            return Response(error="Failed to search and read records")
+        return Response(data=result)
 
     def read_records(self, model_name, ids, fields=None):
         """
@@ -223,8 +223,8 @@ class OdooClient:
             kwargs["fields"] = fields
         result = self._execute(model_name, "read", ids, kwargs)
         if result is None:
-            return Response(error="Failed to read records").to_dict()
-        return Response(data=result).to_dict()
+            return Response(error="Failed to read records")
+        return Response(data=result)
 
     def _execute(self, model, method, *args, **kwargs):
         """Execute a method on an Odoo model via OdooRPC"""

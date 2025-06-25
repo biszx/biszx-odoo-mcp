@@ -15,9 +15,10 @@ class Response:
     def __init__(self, data=None, error=None):
         self.data = data
         self.error = error
+        self.success = error is None
 
     def to_dict(self):
         """Return the response as a dictionary with either 'data' or 'error' key."""
         if self.error is not None:
-            return {"success": False, "error": self.error}
-        return {"success": True, "data": self.data}
+            return {"success": self.success, "error": self.error}
+        return {"success": self.success, "data": self.data}

@@ -6,7 +6,7 @@ import os
 import sys
 import traceback
 
-from .server import mcp
+from .main import mcp
 
 
 def main() -> int:

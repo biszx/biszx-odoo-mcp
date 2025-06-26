@@ -8,7 +8,7 @@ Exception Hierarchy:
 ===================
 
 OdooMCPError (Base)
-├── ConnectionError
+├── OdooConnectionError
 │   ├── ConnectionTimeoutError
 │   ├── AuthenticationError
 │   └── SSLVerificationError
@@ -94,7 +94,11 @@ class OdooMCPError(Exception):
 # =============================================================================
 
 
-class ConnectionTimeoutError(ConnectionError):
+class OdooConnectionError(OdooMCPError):
+    """Base class for Odoo connection-related errors."""
+
+
+class ConnectionTimeoutError(OdooConnectionError):
     """Raised when a connection to Odoo times out."""
 
     def __init__(
@@ -110,7 +114,7 @@ class ConnectionTimeoutError(ConnectionError):
         super().__init__(message, **kwargs)
 
 
-class AuthenticationError(ConnectionError):
+class AuthenticationError(OdooConnectionError):
     """Raised when authentication with Odoo fails."""
 
     def __init__(

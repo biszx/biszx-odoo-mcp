@@ -228,7 +228,7 @@ The Odoo MCP Server features a comprehensive custom exception system that provid
 
 ```
 OdooMCPError (Base)
-├── ConnectionError
+├── OdooConnectionError
 │   ├── ConnectionTimeoutError
 │   ├── AuthenticationError
 │   └── SSLVerificationError

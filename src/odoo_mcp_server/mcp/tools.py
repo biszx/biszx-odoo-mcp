@@ -108,7 +108,7 @@ async def search_records(
 
     Args:
         model_name: Name of the model (e.g., 'res.partner')
-        domain: Search domain as list of tuples (e.g., [['is_company', '=', True]])
+        domain: Search domain as list of tuples (e.g., [['is_company', '=', true]])
         fields: List of field names to return (None for all fields)
         limit: Maximum number of records to return
         offset: Number of records to skip
@@ -126,8 +126,8 @@ async def search_records(
             model_name, domain, fields=fields, limit=limit, offset=offset, order=order
         )
         return Response(data=data).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def read_records(
@@ -154,8 +154,8 @@ async def read_records(
     try:
         data = app_context.odoo.read_records(model_name, ids, fields=fields)
         return Response(data=data).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def create_record(
@@ -178,10 +178,10 @@ async def create_record(
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
     try:
-        record_id = app_context.odoo.create_record(model_name, values)
+        record_id = app_context.odoo.create_records(model_name, [values])
         return Response(data={"id": record_id}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def create_records(
@@ -206,8 +206,8 @@ async def create_records(
     try:
         record_ids = app_context.odoo.create_records(model_name, values_list)
         return Response(data={"ids": record_ids}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def write_record(
@@ -234,8 +234,8 @@ async def write_record(
     try:
         result = app_context.odoo.write_records(model_name, [record_id], values)
         return Response(data={"success": result}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def write_records(
@@ -262,8 +262,8 @@ async def write_records(
     try:
         result = app_context.odoo.write_records(model_name, record_ids, values)
         return Response(data={"success": result}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def unlink_record(
@@ -288,8 +288,8 @@ async def unlink_record(
     try:
         result = app_context.odoo.unlink_records(model_name, [record_id])
         return Response(data={"success": result}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def unlink_records(
@@ -314,8 +314,8 @@ async def unlink_records(
     try:
         result = app_context.odoo.unlink_records(model_name, record_ids)
         return Response(data={"success": result}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def search_count(
@@ -340,8 +340,8 @@ async def search_count(
     try:
         count = app_context.odoo.search_count(model_name, domain)
         return Response(data={"count": count}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def search_ids(
@@ -374,8 +374,8 @@ async def search_ids(
             model_name, domain, offset=offset, limit=limit, order=order
         )
         return Response(data={"ids": ids}).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 async def call_method(
@@ -409,46 +409,11 @@ async def call_method(
     try:
         result = app_context.odoo.call_method(model_name, method_name, args, kwargs)
         return Response(data=result).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
 
 
 # Additional utility tools for better Odoo integration
-
-
-async def bulk_operation(
-    mcp,
-    operation: str,
-    model_name: str,
-    data: list[dict],
-) -> dict:
-    """
-    Perform bulk operations on multiple records.
-
-    Args:
-        operation: Type of operation ('create', 'write', 'unlink')
-        model_name: Name of the model (e.g., 'res.partner')
-        data: List of data for the operation (format depends on operation)
-
-    Returns:
-        Dictionary with operation results
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        if operation == "create":
-            result = app_context.odoo.create_records(model_name, data)
-            return Response(data={"ids": result}).to_dict()
-        if operation == "unlink":
-            # For unlink, data should be list of IDs
-            ids = [item["id"] if isinstance(item, dict) else item for item in data]
-            result = app_context.odoo.unlink_records(model_name, ids)
-            return Response(data={"success": result}).to_dict()
-        return Response(error=f"Unsupported bulk operation: {operation}").to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
 
 
 async def search_and_update(
@@ -490,5 +455,5 @@ async def search_and_update(
                 "update_result": result,  # For backward compatibility
             }
         ).to_dict()
-    except Exception as e:
-        return Response(error=str(e)).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()

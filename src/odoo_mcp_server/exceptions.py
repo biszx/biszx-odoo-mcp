@@ -13,28 +13,18 @@ OdooMCPError (Base)
 │   ├── AuthenticationError
 │   └── SSLVerificationError
 ├── ModelError
-│   ├── ModelNotFoundError
-│   ├── FieldNotFoundError
-│   └── InvalidModelError
-├── DataError
-│   ├── RecordNotFoundError
-│   ├── ValidationError
-│   ├── AccessDeniedError
-│   └── InvalidDataError
+│   └── ModelNotFoundError
 ├── ServerError
-│   ├── RPCError
-│   ├── InternalServerError
-│   └── ConfigurationError
+│   ├── OdooRPCError
+│   └── InternalServerError
 └── MCPError
     ├── ResourceError
-    ├── ToolError
-    └── ContextError
+    └── ToolError
 """
 
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
-from odoorpc.error import InternalError, RPCError
-from odoorpc.rpc.error import ConnectorError
+from odoorpc.error import RPCError
 
 
 class OdooMCPError(Exception):
@@ -139,22 +129,6 @@ class AuthenticationError(ConnectionError):
         super().__init__(message, **kwargs)
 
 
-class SSLVerificationError(ConnectionError):
-    """Raised when SSL certificate verification fails."""
-
-    def __init__(
-        self,
-        message: str = "SSL certificate verification failed",
-        hostname: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        details = kwargs.get("details", {})
-        if hostname:
-            details["hostname"] = hostname
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
 # =============================================================================
 # MODEL RELATED ERRORS
 # =============================================================================
@@ -177,140 +151,6 @@ class ModelNotFoundError(ModelError):
         super().__init__(message, **kwargs)
 
 
-class FieldNotFoundError(ModelError):
-    """Raised when a requested field doesn't exist on a model."""
-
-    def __init__(
-        self,
-        field_name: str,
-        model_name: Optional[str] = None,
-        message: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        if model_name:
-            message = (
-                message or f"Field '{field_name}' not found on model '{model_name}'"
-            )
-        else:
-            message = message or f"Field '{field_name}' not found"
-
-        details = kwargs.get("details", {})
-        details["field_name"] = field_name
-        if model_name:
-            details["model_name"] = model_name
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
-class InvalidModelError(ModelError):
-    """Raised when a model name or configuration is invalid."""
-
-    def __init__(
-        self,
-        model_name: str,
-        reason: Optional[str] = None,
-        message: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        if reason:
-            message = message or f"Invalid model '{model_name}': {reason}"
-        else:
-            message = message or f"Invalid model '{model_name}'"
-
-        details = kwargs.get("details", {})
-        details["model_name"] = model_name
-        if reason:
-            details["reason"] = reason
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
-# =============================================================================
-# DATA RELATED ERRORS
-# =============================================================================
-
-
-class DataError(OdooMCPError):
-    """Base class for data-related errors."""
-
-
-class RecordNotFoundError(DataError):
-    """Raised when a requested record doesn't exist."""
-
-    def __init__(
-        self,
-        record_id: Union[int, str],
-        model_name: Optional[str] = None,
-        message: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        if model_name:
-            message = message or f"Record {record_id} not found in model '{model_name}'"
-        else:
-            message = message or f"Record {record_id} not found"
-
-        details = kwargs.get("details", {})
-        details["record_id"] = record_id
-        if model_name:
-            details["model_name"] = model_name
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
-class ValidationError(DataError):
-    """Raised when data validation fails."""
-
-    def __init__(
-        self,
-        message: str = "Data validation failed",
-        validation_errors: Optional[dict[str, str]] = None,
-        **kwargs,
-    ) -> None:
-        details = kwargs.get("details", {})
-        if validation_errors:
-            details["validation_errors"] = validation_errors
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
-class AccessDeniedError(DataError):
-    """Raised when access to a resource is denied."""
-
-    def __init__(
-        self,
-        message: str = "Access denied",
-        resource: Optional[str] = None,
-        operation: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        details = kwargs.get("details", {})
-        if resource:
-            details["resource"] = resource
-        if operation:
-            details["operation"] = operation
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
-class InvalidDataError(DataError):
-    """Raised when provided data is invalid or malformed."""
-
-    def __init__(
-        self,
-        message: str = "Invalid data provided",
-        data_field: Optional[str] = None,
-        expected_type: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        details = kwargs.get("details", {})
-        if data_field:
-            details["data_field"] = data_field
-        if expected_type:
-            details["expected_type"] = expected_type
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
 # =============================================================================
 # SERVER RELATED ERRORS
 # =============================================================================
@@ -325,38 +165,20 @@ class OdooRPCError(ServerError):
 
     def __init__(
         self,
+        error: RPCError,
+        method: str,
         message: str = "RPC call failed",
-        method: Optional[str] = None,
-        model: Optional[str] = None,
         **kwargs,
     ) -> None:
-        details = kwargs.get("details", {})
-        if method:
-            details["method"] = method
-        if model:
-            details["model"] = model
-        kwargs["details"] = details
+        kwargs["details"] = {
+            "method": method,
+            "odoo_error": error.info,
+        }
         super().__init__(message, **kwargs)
 
 
 class InternalServerError(ServerError):
     """Raised when an internal server error occurs."""
-
-
-class ConfigurationError(ServerError):
-    """Raised when there's a configuration problem."""
-
-    def __init__(
-        self,
-        message: str = "Configuration error",
-        config_key: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        details = kwargs.get("details", {})
-        if config_key:
-            details["config_key"] = config_key
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
 
 
 # =============================================================================
@@ -398,111 +220,3 @@ class ToolError(MCPError):
             details["tool_name"] = tool_name
         kwargs["details"] = details
         super().__init__(message, **kwargs)
-
-
-class ContextError(MCPError):
-    """Raised when there's an issue with the MCP context."""
-
-    def __init__(
-        self,
-        message: str = "Context error",
-        context_type: Optional[str] = None,
-        **kwargs,
-    ) -> None:
-        details = kwargs.get("details", {})
-        if context_type:
-            details["context_type"] = context_type
-        kwargs["details"] = details
-        super().__init__(message, **kwargs)
-
-
-# =============================================================================
-# UTILITY FUNCTIONS
-# =============================================================================
-
-
-def wrap_odoorpc_error(
-    error: Exception, context: Optional[dict[str, Any]] = None
-) -> OdooMCPError:
-    """
-    Wrap OdooRPC errors into our custom exception hierarchy.
-
-    Args:
-        error: The original OdooRPC error
-        context: Additional context information
-
-    Returns:
-        Appropriate custom exception
-    """
-
-    context = context or {}
-    error_obj = None
-
-    if isinstance(error, ConnectorError):
-        error_obj = ConnectionTimeoutError(
-            message=f"Connection failed: {str(error)}",
-            details=context,
-            original_error=error,
-        )
-    elif isinstance(error, RPCError):
-        # Check if it's an authentication error
-        error_str = str(error).lower()
-        if "access" in error_str or "denied" in error_str or "forbidden" in error_str:
-            error_obj = AccessDeniedError(
-                message=f"Access denied: {str(error)}",
-                details=context,
-                original_error=error,
-            )
-        elif "authenticate" in error_str or "login" in error_str:
-            error_obj = AuthenticationError(
-                message=f"Authentication failed: {str(error)}",
-                details=context,
-                original_error=error,
-            )
-        else:
-            error_obj = OdooRPCError(
-                message=f"RPC error: {str(error)}",
-                details=context,
-                original_error=error,
-            )
-    elif isinstance(error, InternalError):
-        error_obj = InternalServerError(
-            message=f"Internal server error: {str(error)}",
-            details=context,
-            original_error=error,
-        )
-
-    if error_obj:
-        return error_obj
-    # For any other exception, wrap it in a generic OdooMCPError
-    return OdooMCPError(
-        message=f"Unexpected error: {str(error)}",
-        details=context,
-        original_error=error,
-    )
-
-
-def handle_exception(
-    func_name: str, error: Exception, context: Optional[dict[str, Any]] = None
-) -> OdooMCPError:
-    """
-    Handle and convert exceptions to appropriate custom exceptions.
-
-    Args:
-        func_name: Name of the function where the error occurred
-        error: The original exception
-        context: Additional context information
-
-    Returns:
-        Appropriate custom exception
-    """
-    context = context or {}
-    context["function"] = func_name
-
-    # If it's already one of our custom exceptions, just add context
-    if isinstance(error, OdooMCPError):
-        if context:
-            error.details.update(context)
-        return error
-
-    return wrap_odoorpc_error(error, context)

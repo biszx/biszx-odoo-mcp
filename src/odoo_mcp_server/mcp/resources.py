@@ -184,7 +184,6 @@ async def get_operations_help_resource() -> str:
             },
             "advanced": {
                 "call_method": "Call custom methods on models",
-                "bulk_operation": "Perform bulk operations",
                 "search_and_update": "Search and update records in one operation",
             },
         },

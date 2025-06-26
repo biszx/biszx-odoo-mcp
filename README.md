@@ -84,40 +84,12 @@ An MCP server implementation that integrates with Odoo ERP systems, enabling AI 
   - Inputs: `model_name` (string)
   - Returns: Dictionary with field definitions
 
-### System Information
-
-- **get_server_info**: Get Odoo server information
-
-  - Returns: Dictionary with server details
-
-- **get_user_info**: Get current user information
-
-  - Returns: Dictionary with user details
-
-- **get_company_info**: Get current company information
-  - Returns: Dictionary with company details
-
 ### Utility Operations
-
-- **bulk_operation**: Perform bulk operations
-
-  - Inputs: `operation` (string: 'create' or 'unlink'), `model_name` (string), `data` (array)
-  - Returns: Dictionary with operation results
 
 - **search_and_update**: Search and update records in one operation
 
   - Inputs: `model_name` (string), `domain` (array), `values` (object)
   - Returns: Dictionary with affected record count and IDs
-
-- **copy_record**: Copy a record with optional defaults
-
-  - Inputs: `model_name` (string), `record_id` (number), `default_values` (optional object)
-  - Returns: Dictionary with copied record ID
-
-- **check_access_rights**: Check access rights for operations
-
-  - Inputs: `model_name` (string), `operation` (string), `raise_exception` (optional boolean)
-  - Returns: Dictionary with access rights information
 
 - **call_method**: Call custom methods on models
 
@@ -191,16 +163,6 @@ await write_record("res.partner", 42, {"email": "newemail@acme.com"})
 
 # Bulk update: deactivate all draft sales orders
 await search_and_update("sale.order", [["state", "=", "draft"]], {"active": False})
-```
-
-### Advanced Operations
-
-```python
-# Copy a product with new name
-await copy_record("product.template", 1, {"name": "Copy of Original Product"})
-
-# Check if user can create partners
-await check_access_rights("res.partner", "create")
 ```
 
 ## Domain Syntax Guide
@@ -404,22 +366,13 @@ OdooMCPError (Base)
 │   ├── AuthenticationError
 │   └── SSLVerificationError
 ├── ModelError
-│   ├── ModelNotFoundError
-│   ├── FieldNotFoundError
-│   └── InvalidModelError
-├── DataError
-│   ├── RecordNotFoundError
-│   ├── ValidationError
-│   ├── AccessDeniedError
-│   └── InvalidDataError
+│   └── ModelNotFoundError
 ├── ServerError
 │   ├── OdooRPCError
-│   ├── InternalServerError
-│   └── ConfigurationError
+│   └── InternalServerError
 └── MCPError
     ├── ResourceError
-    ├── ToolError
-    └── ContextError
+    └── ToolError
 ```
 
 ### Key Exception Features

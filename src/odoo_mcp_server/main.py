@@ -33,7 +33,7 @@ log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
 logger.add(
     sys.stderr,
     format=(
-        "<green>{time:HH:mm:ss}</green> | "
+        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
         "<level>{level: <8}</level> | "
         "<level>{message}</level>"
     ),
@@ -113,9 +113,9 @@ async def search_models_resource(query: str):
 mcp.resource("odoo://models/list")(models_list_resource)
 mcp.resource("odoo://models/{model_name}/fields")(model_fields_resource)
 mcp.resource("odoo://models/{model_name}/info")(model_info_resource)
+mcp.resource("odoo://models/search/{query}")(search_models_resource)
 mcp.resource("odoo://help/domains")(resources.get_domain_help_resource)
 mcp.resource("odoo://help/operations")(resources.get_operations_help_resource)
-mcp.resource("odoo://models/search/{query}")(search_models_resource)
 
 
 # Register all tools using the helper
@@ -133,5 +133,4 @@ tool(tools.unlink_records)
 tool(tools.search_count)
 tool(tools.search_ids)
 tool(tools.call_method)
-tool(tools.bulk_operation)
 tool(tools.search_and_update)

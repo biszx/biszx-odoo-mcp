@@ -31,12 +31,7 @@ TABLE OF CONTENTS:
 5. ACCESS CONTROL
    - check_access_rights()
 
-6. SYSTEM INFORMATION
-   - get_server_info()
-   - get_user_info()
-   - get_company_info()
-
-7. GENERIC METHOD EXECUTION
+6. GENERIC METHOD EXECUTION
    - execute_method()
    - call_method()
 """
@@ -53,7 +48,6 @@ from odoo_mcp_server.exceptions import (
     AuthenticationError,
     ConnectionTimeoutError,
     InternalServerError,
-    InvalidDataError,
     ModelNotFoundError,
     OdooRPCError,
 )
@@ -133,7 +127,7 @@ class OdooClient:
                         username=self.config.username,
                         database=self.config.db,
                     ) from e
-                raise OdooRPCError(f"RPC error: {str(e)}") from e
+                raise OdooRPCError(error=e, method="connect") from e
             if isinstance(e, ConnectorError):
                 raise ConnectionTimeoutError(
                     f"Connection failed: {str(e)}", timeout=self.config.timeout
@@ -162,20 +156,10 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             IrModel = odoo_conn.env["ir.model"]  # type: ignore
-            model_records = IrModel.search_read([], ["model", "name"])
-
-            if not model_records:
-                raise InvalidDataError("No models found in the system")
-
-            models = sorted([rec["model"] for rec in model_records])
-            return {
-                "model_names": models,
-                "models_details": {
-                    rec["model"]: {"name": rec.get("name", "")} for rec in model_records
-                },
-            }
+            result = IrModel.search_read([], ["model", "name", "info"])
+            return {rec["model"]: rec for rec in result}
         except RPCError as e:
-            raise OdooRPCError(f"Failed to get models: {str(e)}") from e
+            raise OdooRPCError(e, method="get_models") from e
 
     def get_model_info(self, model_name):
         """
@@ -197,13 +181,13 @@ class OdooClient:
             odoo_conn = self._ensure_connected()
             IrModel = odoo_conn.env["ir.model"]  # type: ignore
             result = IrModel.search_read(
-                [("model", "=", model_name)], ["name", "model"]
+                [("model", "=", model_name)], ["model", "name", "info"]
             )
             if not result:
                 raise ModelNotFoundError(model_name)
             return result[0]
         except RPCError as e:
-            raise OdooRPCError(f"Failed to get model info: {str(e)}") from e
+            raise OdooRPCError(e, method="get_model_info") from e
 
     def get_model_fields(self, model_name):
         """
@@ -224,12 +208,9 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
-            fields = Model.fields_get()
-            if fields is None:
-                raise ValueError(f"Failed to get fields for {model_name}")
-            return fields
+            return Model.fields_get()
         except RPCError as e:
-            raise ValueError(f"Failed to get fields for {model_name}: {str(e)}") from e
+            raise OdooRPCError(e, method="get_model_fields") from e
 
     def search_models(self, query):
         """
@@ -253,19 +234,10 @@ class OdooClient:
             ['res.partner', 'res.partner.bank', 'res.partner.category']
         """
         try:
-            # Search for models that match the query
-            domain = ["|", ("model", "ilike", query), ("name", "ilike", query)]
-
             odoo_conn = self._ensure_connected()
+            domain = ["|", ("model", "ilike", query), ("name", "ilike", query)]
             IrModel = odoo_conn.env["ir.model"]  # type: ignore
-            matching_models = IrModel.search_read(
-                domain, {"fields": ["model", "name", "info"]}
-            )
-
-            if matching_models is None:
-                raise ValueError("Failed to search models")
-
-            # Format the results
+            matching_models = IrModel.search_read(domain, ["model", "name", "info"])
             return {
                 "query": query,
                 "found_models": len(matching_models),
@@ -279,9 +251,7 @@ class OdooClient:
                 ],
             }
         except RPCError as e:
-            raise ValueError(f"RPC error searching models: {str(e)}") from e
-        except InternalError as e:
-            raise ValueError(f"Internal error searching models: {str(e)}") from e
+            raise OdooRPCError(e, method="search_models") from e
 
     # ============================================================================
     # SEARCH AND READ OPERATIONS
@@ -322,12 +292,9 @@ class OdooClient:
             if order is not None:
                 search_kwargs["order"] = order
 
-            result = Model.search(domain, **search_kwargs)
-            if result is None:
-                raise ValueError("Failed to search record IDs")
-            return result
+            return Model.search(domain, **search_kwargs)
         except RPCError as e:
-            raise ValueError(f"Failed to search record IDs: {str(e)}") from e
+            raise OdooRPCError(e, method="search_ids") from e
 
     def search_count(self, model_name, domain):
         """
@@ -349,12 +316,9 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
-            result = Model.search_count(domain)
-            if result is None:
-                raise ValueError("Failed to count records")
-            return result
+            return Model.search_count(domain)
         except RPCError as e:
-            raise ValueError(f"Failed to count records: {str(e)}") from e
+            raise OdooRPCError(e, method="search_count") from e
 
     def search_read(
         self, model_name, domain, fields=None, offset=None, limit=None, order=None
@@ -396,12 +360,9 @@ class OdooClient:
             if order is not None:
                 search_kwargs["order"] = order
 
-            result = Model.search_read(domain, **search_kwargs)
-            if result is None:
-                raise ValueError("Failed to search and read records")
-            return result
+            return Model.search_read(domain, **search_kwargs)
         except RPCError as e:
-            raise ValueError(f"Failed to search and read records: {str(e)}") from e
+            raise OdooRPCError(e, method="search_read") from e
 
     def read_records(self, model_name, ids, fields=None):
         """
@@ -430,46 +391,17 @@ class OdooClient:
             else:
                 result = Model.browse(ids).read()
 
-            if result is None:
-                raise ValueError("Failed to read records")
             return result
         except RPCError as e:
-            raise ValueError(f"Failed to read records: {str(e)}") from e
+            raise OdooRPCError(e, method="read_records") from e
 
     # ============================================================================
     # CRUD OPERATIONS
     # ============================================================================
 
-    def create_record(self, model_name, values):
-        """
-        Create a new record in an Odoo model
-
-        Args:
-            model_name: Name of the model (e.g., 'res.partner')
-            values: Dictionary with field values for the new record
-
-        Returns:
-            The created record ID
-
-        Examples:
-            >>> client = OdooClient(url, db, username, password)
-            >>> record_id = client.create_record('res.partner', {'name': 'New Company'})
-            >>> print(record_id)
-            42
-        """
-        try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
-            result = Model.create(values)
-            if result is None:
-                raise ValueError("Failed to create record")
-            return result
-        except RPCError as e:
-            raise ValueError(f"Failed to create record: {str(e)}") from e
-
     def create_records(self, model_name, values_list):
         """
-        Create multiple records in an Odoo model
+        Create records in an Odoo model
 
         Args:
             model_name: Name of the model (e.g., 'res.partner')
@@ -489,12 +421,9 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
-            result = Model.create(values_list)
-            if result is None:
-                raise ValueError("Failed to create records")
-            return result
+            return Model.create(values_list)
         except RPCError as e:
-            raise ValueError(f"Failed to create records: {str(e)}") from e
+            raise OdooRPCError(e, method="create_records") from e
 
     def write_records(self, model_name, record_ids, values):
         """
@@ -520,12 +449,9 @@ class OdooClient:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
             records = Model.browse(record_ids)
-            result = records.write(values)
-            if result is None:
-                raise ValueError("Failed to write records")
-            return result
+            return records.write(values)
         except RPCError as e:
-            raise ValueError(f"Failed to write records: {str(e)}") from e
+            raise OdooRPCError(e, method="write_records") from e
 
     def unlink_records(self, model_name, record_ids):
         """
@@ -548,179 +474,9 @@ class OdooClient:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
             records = Model.browse(record_ids)
-            result = records.unlink()
-            if result is None:
-                raise ValueError("Failed to unlink records")
-            return result
+            return records.unlink()
         except RPCError as e:
-            raise ValueError(f"Failed to unlink records: {str(e)}") from e
-
-    def copy_record(self, model_name, record_id, default_values=None):
-        """
-        Copy a record with optional default values
-
-        Args:
-            model_name: Name of the model (e.g., 'res.partner')
-            record_id: ID of the record to copy
-            default_values: Dictionary with default values for the copied record
-
-        Returns:
-            The copied record ID
-
-        Examples:
-            >>> client = OdooClient(url, db, username, password)
-            >>> new_id = client.copy_record(
-            ...     'res.partner', 1, {'name': 'Copy of Company'}
-            ... )
-            >>> print(new_id)
-            43
-        """
-        try:
-            if default_values is None:
-                default_values = {}
-            odoo_conn = self._ensure_connected()
-            model_proxy = odoo_conn.env[model_name]  # type: ignore
-            record = model_proxy.browse(record_id)
-            result = record.copy(default_values)
-            if result is None:
-                raise ValueError("Failed to copy record")
-            return result.id
-        except RPCError as e:
-            raise ValueError(f"RPC error copying record: {str(e)}") from e
-        except InternalError as e:
-            raise ValueError(f"Internal error copying record: {str(e)}") from e
-
-    # ============================================================================
-    # ACCESS CONTROL
-    # ============================================================================
-
-    def check_access_rights(self, model_name, operation, raise_exception=False):
-        """
-        Check access rights for a model operation
-
-        Args:
-            model_name: Name of the model (e.g., 'res.partner')
-            operation: Operation to check ('read', 'write', 'create', 'unlink')
-            raise_exception: Whether to raise exception if access denied
-
-        Returns:
-            Boolean indicating if user has access
-
-        Examples:
-            >>> client = OdooClient(url, db, username, password)
-            >>> has_access = client.check_access_rights('res.partner', 'read')
-            >>> print(has_access)
-            True
-        """
-        try:
-            odoo_conn = self._ensure_connected()
-            model_proxy = odoo_conn.env[model_name]  # type: ignore
-            result = model_proxy.check_access_rights(operation, raise_exception)
-            return result
-        except RPCError as e:
-            raise ValueError(f"RPC error checking access rights: {str(e)}") from e
-        except InternalError as e:
-            raise ValueError(f"Internal error checking access rights: {str(e)}") from e
-
-    # ============================================================================
-    # SYSTEM INFORMATION
-    # ============================================================================
-
-    def get_server_info(self):
-        """
-        Get information about the Odoo server
-
-        Returns:
-            Dictionary with server information
-
-        Examples:
-            >>> client = OdooClient(url, db, username, password)
-            >>> info = client.get_server_info()
-            >>> print(info['server_version'])
-            '16.0'
-        """
-        try:
-            odoo_conn = self._ensure_connected()
-            version_info = odoo_conn.version  # type: ignore
-            server_info = {
-                "server_version": version_info.get("server_version", "Unknown"),
-                "server_serie": version_info.get("server_serie", "Unknown"),
-                "protocol_version": version_info.get("protocol_version", "Unknown"),
-                "database": self.config.db,
-                "hostname": self.hostname,
-            }
-            return server_info
-        except RPCError as e:
-            raise ValueError(f"Failed to get server info: {str(e)}") from e
-
-    def get_user_info(self):
-        """
-        Get information about the current user
-
-        Returns:
-            Dictionary with user information
-
-        Examples:
-            >>> client = OdooClient(url, db, username, password)
-            >>> info = client.get_user_info()
-            >>> print(info['name'])
-            'Administrator'
-        """
-        try:
-            if self.uid:
-                odoo_conn = self._ensure_connected()
-                ResUsers = odoo_conn.env["res.users"]  # type: ignore
-                user = ResUsers.browse(self.uid)
-                result = user.read(
-                    ["name", "login", "email", "company_id", "groups_id"]
-                )
-                if result:
-                    return result[0]
-            raise ValueError("Failed to get user info")
-        except RPCError as e:
-            raise ValueError(f"Error getting user info: {str(e)}") from e
-
-    def get_company_info(self):
-        """
-        Get information about the current company
-
-        Returns:
-            Dictionary with company information
-
-        Examples:
-            >>> client = OdooClient(url, db, username, password)
-            >>> info = client.get_company_info()
-            >>> print(info['name'])
-            'YourCompany'
-        """
-        try:
-            odoo_conn = self._ensure_connected()
-            ResUsers = odoo_conn.env["res.users"]  # type: ignore
-            ResCompany = odoo_conn.env["res.company"]  # type: ignore
-
-            # Get current user's company
-            user = ResUsers.browse(self.uid)
-            user_info = user.read(["company_id"])
-
-            if user_info and user_info[0].get("company_id"):
-                company_id = user_info[0]["company_id"][0]
-                company = ResCompany.browse(company_id)
-                company_info = company.read(
-                    [
-                        "name",
-                        "email",
-                        "phone",
-                        "website",
-                        "vat",
-                        "country_id",
-                        "currency_id",
-                    ]
-                )
-                if company_info:
-                    return company_info[0]
-            raise ValueError("Failed to get company info")
-        except RPCError as e:
-            raise ValueError(f"Error getting company info: {str(e)}") from e
+            raise OdooRPCError(e, method="unlink_records") from e
 
     # ============================================================================
     # GENERIC METHOD EXECUTION
@@ -746,15 +502,7 @@ class OdooClient:
             method_func = getattr(model_proxy, method)
             return method_func(*args, **kwargs)
         except RPCError as e:
-            raise ValueError(f"RPC error executing {model}.{method}: {str(e)}") from e
-        except InternalError as e:
-            raise ValueError(
-                f"Internal error executing {model}.{method}: {str(e)}"
-            ) from e
-        except AttributeError as e:
-            raise ValueError(
-                f"Method {method} not found on model {model}: {str(e)}"
-            ) from e
+            raise OdooRPCError(e, method=f"execute_method: {model}.{method}") from e
 
     def call_method(self, model_name, method_name, args, kwargs):
         """
@@ -785,11 +533,9 @@ class OdooClient:
                 raise ValueError(f"Failed to call method {method_name}")
             return result
         except RPCError as e:
-            raise ValueError(f"RPC error calling {method_name}: {str(e)}") from e
-        except InternalError as e:
-            raise ValueError(f"Internal error calling {method_name}: {str(e)}") from e
-        except AttributeError as e:
-            raise ValueError(f"Method {method_name} not found: {str(e)}") from e
+            raise OdooRPCError(
+                e, method=f"call_method: {model_name}.{method_name}"
+            ) from e
 
 
 def get_odoo_client():

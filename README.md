@@ -71,17 +71,8 @@ An MCP server implementation that integrates with Odoo ERP systems, enabling AI 
 
 ### Model Operations
 
-- **get_odoo_models**: Get list of all available models
-
-  - Returns: Dictionary with model information
-
-- **get_model_info**: Get information about a specific model
-
-  - Inputs: `model_name` (string)
-  - Returns: Dictionary with model information
-
 - **get_model_fields**: Get field definitions for a model
-  - Inputs: `model_name` (string)
+  - Inputs: `model_name` (string), `query_field` (string)
   - Returns: Dictionary with field definitions
 
 ### Utility Operations
@@ -96,74 +87,16 @@ An MCP server implementation that integrates with Odoo ERP systems, enabling AI 
   - Inputs: `model_name` (string), `method_name` (string), `args` (optional array), `kwargs` (optional object)
   - Returns: Dictionary with method result
 
-- **get_record_history**: Get change history for a record (requires audit module)
-  - Inputs: `model_name` (string), `record_id` (number)
-  - Returns: Dictionary with change history
-
 ## Resources
 
 ### Model Information
 
-- **odoo://models/list**: Complete list of all available models with descriptions
 - **odoo://models/{model_name}/fields**: Field definitions for a specific model
-- **odoo://models/{model_name}/info**: Information about a specific model
-- **odoo://models/common**: Information about commonly used Odoo models
-
-### System Information
-
-- **odoo://server/info**: Odoo server information
-- **odoo://user/info**: Current user information
-- **odoo://company/info**: Current company information
 
 ### Documentation
 
 - **odoo://help/domains**: Complete guide to Odoo domain syntax with examples
 - **odoo://help/operations**: Documentation of all available MCP tools and workflows
-
-## Common Use Cases
-
-### Creating Records
-
-```python
-# Create a new customer
-await create_record("res.partner", {
-    "name": "Acme Corporation",
-    "email": "contact@acme.com",
-    "is_company": True
-})
-
-# Create multiple products at once
-await create_records("product.template", [
-    {"name": "Product A", "list_price": 100.0},
-    {"name": "Product B", "list_price": 150.0}
-])
-```
-
-### Searching and Filtering
-
-```python
-# Find all companies
-await search_records("res.partner", [["is_company", "=", True]], fields=["name", "email"])
-
-# Search for products in a price range
-await search_records("product.template", [
-    ["list_price", ">=", 10.0],
-    ["list_price", "<=", 100.0]
-], limit=20)
-
-# Count active users
-await search_count("res.users", [["active", "=", True]])
-```
-
-### Updating Records
-
-```python
-# Update a single customer's email
-await write_record("res.partner", 42, {"email": "newemail@acme.com"})
-
-# Bulk update: deactivate all draft sales orders
-await search_and_update("sale.order", [["state", "=", "draft"]], {"active": False})
-```
 
 ## Domain Syntax Guide
 
@@ -187,21 +120,6 @@ Odoo uses domain syntax for filtering records. Here are common patterns:
 - `["&", condition1, condition2]` - AND (default between conditions)
 - `["|", condition1, condition2]` - OR
 - `["!", condition]` - NOT
-
-### Examples
-
-```python
-# Companies with Gmail email
-[["is_company", "=", True], ["email", "ilike", "gmail"]]
-
-# Products between $10-100 OR on sale
-["|",
- ["&", ["list_price", ">=", 10], ["list_price", "<=", 100]],
- ["on_sale", "=", True]]
-
-# Not draft invoices
-[["!", ["state", "=", "draft"]]]
-```
 
 ## Configuration
 
@@ -236,19 +154,6 @@ The server supports configurable logging levels via the `LOG_LEVEL` environment 
 - `WARNING`: Shows only warnings and errors
 - `ERROR`: Shows only error messages
 
-Example usage:
-
-```bash
-# Default info level
-python -m odoo_mcp_server
-
-# Debug level for troubleshooting
-LOG_LEVEL=DEBUG python -m odoo_mcp_server
-
-# Minimal logging
-LOG_LEVEL=WARNING python -m odoo_mcp_server
-```
-
 ### Usage with Claude Desktop
 
 Add this to your `claude_desktop_config.json`:
@@ -257,40 +162,8 @@ Add this to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "odoo": {
-      "command": "python",
-      "args": ["-m", "odoo_mcp"],
-      "env": {
-        "ODOO_URL": "https://your-odoo-instance.com",
-        "ODOO_DB": "your-database-name",
-        "ODOO_USERNAME": "your-username",
-        "ODOO_PASSWORD": "your-password-or-api-key"
-      }
-    }
-  }
-}
-```
-
-### Docker
-
-```json
-{
-  "mcpServers": {
-    "odoo": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "ODOO_URL",
-        "-e",
-        "ODOO_DB",
-        "-e",
-        "ODOO_USERNAME",
-        "-e",
-        "ODOO_PASSWORD",
-        "mcp/odoo"
-      ],
+      "command": "uvx",
+      "args": ["odoo-mcp-server"],
       "env": {
         "ODOO_URL": "https://your-odoo-instance.com",
         "ODOO_DB": "your-database-name",
@@ -307,23 +180,17 @@ Add this to your `claude_desktop_config.json`:
 ### Python Package
 
 ```bash
-pip install odoo-mcp
+pip install odoo-mcp-server
 ```
 
 ### Running the Server
 
 ```bash
 # Using the installed package
-odoo-mcp
+odoo-mcp-server
 
 # Using the MCP development tools
-mcp dev odoo_mcp/server.py
-
-# With additional dependencies
-mcp dev odoo_mcp/server.py --with pandas --with numpy
-
-# Mount local code for development
-mcp dev odoo_mcp/server.py --with-editable .
+uv run mcp dev src/odoo_mcp_server/__main__.py
 ```
 
 ## Build

@@ -5,43 +5,14 @@ Provides MCP tools and resources for interacting with Odoo ERP systems
 """
 
 import inspect
-import os
-import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from loguru import logger
 from mcp.server.fastmcp import FastMCP
 
 from odoo_mcp_server.server import resources, tools
 from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.tools.odoo_client import get_odoo_client
-
-
-def init() -> None:
-    """
-    Initialize the Odoo MCP Server environment
-    """
-    try:
-        from dotenv import load_dotenv  # pylint: disable=import-outside-toplevel
-
-        load_dotenv()
-    except ImportError:
-        pass
-
-    # Configure loguru with appropriate log level
-    logger.remove()
-    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
-    logger.add(
-        sys.stderr,
-        format=(
-            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-            "<level>{level: <8}</level> | "
-            "<level>{message}</level>"
-        ),
-        level=log_level,
-        colorize=True,
-    )
 
 
 @asynccontextmanager
@@ -95,8 +66,6 @@ async def model_fields_resource(model_name: str, query_field: str):
     """Get field definitions for a specific model"""
     return await resources.get_model_fields_resource(mcp, model_name, query_field)
 
-
-init()
 
 # Register all resources directly
 mcp.resource("odoo://models/{model_name}/fields/{query_field}")(model_fields_resource)

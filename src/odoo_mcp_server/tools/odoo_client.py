@@ -248,6 +248,7 @@ class OdooClient:
                             "required": value.get("required", False),
                             "readonly": value.get("readonly", False),
                             "searchable": value.get("searchable", False),
+                            "relation": value.get("relation", False),
                         }
             else:
                 result["fields"] = data

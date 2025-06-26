@@ -13,8 +13,8 @@ from contextlib import asynccontextmanager
 from loguru import logger
 from mcp.server.fastmcp import FastMCP
 
-from odoo_mcp_server.mcp import resources, tools
-from odoo_mcp_server.mcp.context import AppContext
+from odoo_mcp_server.server import resources, tools
+from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.tools.odoo_client import get_odoo_client
 
 try:

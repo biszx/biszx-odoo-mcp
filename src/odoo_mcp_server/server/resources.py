@@ -7,7 +7,7 @@ This module contains all the MCP resource functions for Odoo data access.
 from typing import cast
 
 from odoo_mcp_server.exceptions import OdooMCPError, ResourceError
-from odoo_mcp_server.mcp.context import AppContext
+from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.server.response import Response
 
 

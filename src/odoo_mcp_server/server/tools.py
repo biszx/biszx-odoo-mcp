@@ -7,7 +7,7 @@ This module contains all the MCP tool functions for interacting with Odoo.
 from typing import cast
 
 from odoo_mcp_server.exceptions import OdooMCPError, ToolError
-from odoo_mcp_server.mcp.context import AppContext
+from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.server.response import Response
 
 

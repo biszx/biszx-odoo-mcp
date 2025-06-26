@@ -12,15 +12,7 @@ TABLE OF CONTENTS:
 2. MODEL INTROSPECTION
    - get_models()
    - get_model_info()
-   - get_model_f            # Build search arguments
-            search_kwargs: dict[str, Any] = {}
-            if offset is not None:
-                search_kwargs["offset"] = offset
-            if limit is not None:
-                search_kwargs["limit"] = limit
-            if order is not None:
-                search_kwargs["order"] = order   - search_models()
-
+   - get_model_fields()
 3. SEARCH AND READ OPERATIONS
    - search_ids()
    - search_count()
@@ -271,19 +263,20 @@ class OdooClient:
                 "fields": {},
             }
             if query is not None:
-                for value in data.values():
+                for field, value in data.items():
+                    if "related" in value:
+                        continue
+
                     if all(
                         {
-                            "name" in value,
-                            "related" not in value,
-                            query.lower() in value.get("name", "").lower()
-                            or query.lower() in value.get("string", "").lower(),
+                            query.lower() in field.lower()
+                            or query.lower() in value["string"].lower(),
                         }
                     ):
-                        result["fields"][value["name"]] = {
-                            "name": value["name"],
-                            "string": value.get("string", ""),
-                            "type": value.get("type", ""),
+                        result["fields"][field] = {
+                            "name": field,
+                            "string": value["string"],
+                            "type": value["type"],
                             "required": value.get("required", False),
                             "readonly": value.get("readonly", False),
                             "searchable": value.get("searchable", False),

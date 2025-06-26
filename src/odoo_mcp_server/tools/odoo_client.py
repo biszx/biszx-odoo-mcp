@@ -43,7 +43,7 @@ TABLE OF CONTENTS:
 """
 
 import urllib.parse
-from typing import Any, Optional, cast
+from typing import Any, Optional, Protocol, cast
 
 import odoorpc  # type: ignore
 from loguru import logger
@@ -58,6 +58,36 @@ from odoo_mcp_server.exceptions import (
     OdooRPCError,
 )
 from odoo_mcp_server.tools.config import Config
+
+
+class OdooModelProtocol(Protocol):
+    """Protocol defining the interface for Odoo model proxy objects"""
+
+    def search(self, domain: list[Any], **kwargs: Any) -> list[int]:
+        """Search for record IDs"""
+        ...
+
+    def search_count(self, domain: list[Any]) -> int:
+        """Count records matching domain"""
+        ...
+
+    def search_read(
+        self, domain: list[Any], fields: Optional[list[str]] = None, **kwargs: Any
+    ) -> list[dict[str, Any]]:
+        """Search and read records"""
+        ...
+
+    def browse(self, ids: list[int]) -> Any:
+        """Browse records by IDs"""
+        ...
+
+    def create(self, values: list[dict[str, Any]]) -> Any:
+        """Create records"""
+        ...
+
+    def fields_get(self) -> dict[str, Any]:
+        """Get field definitions"""
+        ...
 
 
 class OdooClient:
@@ -86,11 +116,16 @@ class OdooClient:
         self.uid: Optional[int] = None  # Will be set after login
         self._connect()
 
-    def _ensure_connected(self) -> odoorpc.ODOO:
+    def _ensure_connected(self) -> Any:
         """Ensure we have a valid connection"""
         if self.odoo is None:
             raise InternalServerError("Not connected to Odoo")
         return self.odoo
+
+    def _get_model(self, model_name: str) -> OdooModelProtocol:
+        """Get a model proxy with proper typing"""
+        odoo_conn = self._ensure_connected()
+        return cast(OdooModelProtocol, odoo_conn.env[model_name])
 
     def _connect(self) -> None:
         """Initialize the OdooRPC connection and authenticate"""
@@ -113,8 +148,7 @@ class OdooClient:
             self.odoo.login(self.config.db, self.config.username, self.config.password)
 
             # Get user ID for later use
-            odoo_conn = self._ensure_connected()
-            user_model = odoo_conn.env["res.users"]  # type: ignore
+            user_model = self._get_model("res.users")
             user_records = user_model.search([("login", "=", self.config.username)])
             self.uid = user_records[0] if user_records else None
 
@@ -166,9 +200,8 @@ class OdooClient:
             ['res.partner', 'res.partner.bank', 'res.partner.category']
         """
         try:
-            odoo_conn = self._ensure_connected()
             domain = ["|", ("model", "like", query), ("name", "like", query)]
-            IrModel = odoo_conn.env["ir.model"]  # type: ignore
+            IrModel = self._get_model("ir.model")
             matching_models = IrModel.search_read(domain, ["model", "name"])
             return {
                 "query": query,
@@ -202,14 +235,13 @@ class OdooClient:
             'Contact'
         """
         try:
-            odoo_conn = self._ensure_connected()
-            IrModel = odoo_conn.env["ir.model"]  # type: ignore
+            IrModel = self._get_model("ir.model")
             result = IrModel.search_read(
                 [("model", "=", model_name)], ["model", "name"]
             )
             if not result:
                 raise ModelNotFoundError(model_name)
-            return cast(dict[str, Any], result[0])
+            return result[0]
         except RPCError as e:
             raise OdooRPCError(e, method="get_model_info") from e
 
@@ -232,8 +264,7 @@ class OdooClient:
             'char'
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
+            Model = self._get_model(model_name)
             data: dict[str, Any] = Model.fields_get()
             result: dict[str, Any] = {
                 "length": 0,
@@ -299,8 +330,7 @@ class OdooClient:
             [1, 2, 3, 4, 5]
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
+            Model = self._get_model(model_name)
 
             # Build search kwargs
             search_kwargs: dict[str, Any] = {}
@@ -311,7 +341,7 @@ class OdooClient:
             if order is not None:
                 search_kwargs["order"] = order
 
-            return cast(list[int], Model.search(domain, **search_kwargs))
+            return Model.search(domain, **search_kwargs)
         except RPCError as e:
             raise OdooRPCError(e, method="search_ids") from e
 
@@ -333,9 +363,8 @@ class OdooClient:
             25
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
-            return cast(int, Model.search_count(domain))
+            Model = self._get_model(model_name)
+            return Model.search_count(domain)
         except RPCError as e:
             raise OdooRPCError(e, method="search_count") from e
 
@@ -371,8 +400,7 @@ class OdooClient:
             5
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
+            Model = self._get_model(model_name)
 
             # Build search_read arguments
             search_kwargs: dict[str, Any] = {}
@@ -386,7 +414,7 @@ class OdooClient:
                 search_kwargs["order"] = order
 
             result = Model.search_read(domain, **search_kwargs)
-            return cast(list[dict[str, Any]], result)
+            return result
         except RPCError as e:
             raise OdooRPCError(e, method="search_read") from e
 
@@ -414,8 +442,7 @@ class OdooClient:
             'YourCompany'
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
+            Model = self._get_model(model_name)
 
             if fields is not None:
                 result = Model.browse(ids).read(fields)
@@ -452,8 +479,7 @@ class OdooClient:
             [42, 43]
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
+            Model = self._get_model(model_name)
             return cast(int | list[int], Model.create(values_list))
         except RPCError as e:
             raise OdooRPCError(e, method="create_records") from e
@@ -484,8 +510,7 @@ class OdooClient:
             True
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
+            Model = self._get_model(model_name)
             records = Model.browse(record_ids)
             return cast(bool, records.write(values))
         except RPCError as e:
@@ -509,8 +534,7 @@ class OdooClient:
             True
         """
         try:
-            odoo_conn = self._ensure_connected()
-            Model = odoo_conn.env[model_name]  # type: ignore
+            Model = self._get_model(model_name)
             records = Model.browse(record_ids)
             return cast(bool, records.unlink())
         except RPCError as e:
@@ -534,8 +558,7 @@ class OdooClient:
             Result of the method execution
         """
         try:
-            odoo_conn = self._ensure_connected()
-            model_proxy = odoo_conn.env[model]  # type: ignore
+            model_proxy = self._get_model(model)
             # Use getattr to dynamically call the method on the model proxy
             method_func = getattr(model_proxy, method)
             return method_func(*args, **kwargs)
@@ -568,8 +591,7 @@ class OdooClient:
             [(1, 'YourCompany')]
         """
         try:
-            odoo_conn = self._ensure_connected()
-            model_proxy = odoo_conn.env[model_name]  # type: ignore
+            model_proxy = self._get_model(model_name)
             # Use getattr to dynamically call the method on the model proxy
             method_func = getattr(model_proxy, method_name)
             result = method_func(*args, **kwargs)

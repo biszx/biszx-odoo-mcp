@@ -4,14 +4,14 @@ MCP Tools for Odoo integration
 This module contains all the MCP tool functions for interacting with Odoo.
 """
 
-from typing import cast
+from typing import Any, cast
 
 from odoo_mcp_server.exceptions import OdooMCPError, ToolError
 from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.server.response import Response
 
 
-async def search_models(mcp, query: str) -> dict:
+async def search_models(mcp: Any, query: str) -> dict[str, Any]:
     """
     Get a list of all available models in the Odoo system.
 
@@ -39,7 +39,7 @@ async def search_models(mcp, query: str) -> dict:
         return Response(error=tool_error.to_dict()).to_dict()
 
 
-async def get_model_info(mcp, model_name: str) -> dict:
+async def get_model_info(mcp: Any, model_name: str) -> dict[str, Any]:
     """
     Get information about a specific Odoo model.
 
@@ -68,7 +68,9 @@ async def get_model_info(mcp, model_name: str) -> dict:
         return Response(error=tool_error.to_dict()).to_dict()
 
 
-async def get_model_fields(mcp, model_name: str, query_field: str) -> dict:
+async def get_model_fields(
+    mcp: Any, model_name: str, query_field: str
+) -> dict[str, Any]:
     """
     Get field definitions for a specific Odoo model.
 
@@ -99,14 +101,14 @@ async def get_model_fields(mcp, model_name: str, query_field: str) -> dict:
 
 
 async def search_records(
-    mcp,
+    mcp: Any,
     model_name: str,
-    domain: list,
+    domain: list[Any],
     fields: list[str] | None = None,
     limit: int | None = None,
     offset: int | None = None,
     order: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Search for records in an Odoo model.
 
@@ -135,11 +137,11 @@ async def search_records(
 
 
 async def read_records(
-    mcp,
+    mcp: Any,
     model_name: str,
     ids: list[int],
     fields: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Read specific records by their IDs.
 
@@ -163,10 +165,10 @@ async def read_records(
 
 
 async def create_record(
-    mcp,
+    mcp: Any,
     model_name: str,
-    values: dict,
-) -> dict:
+    values: dict[str, Any],
+) -> dict[str, Any]:
     """
     Create a new record in an Odoo model.
 
@@ -189,10 +191,10 @@ async def create_record(
 
 
 async def create_records(
-    mcp,
+    mcp: Any,
     model_name: str,
-    values_list: list[dict],
-) -> dict:
+    values_list: list[dict[str, Any]],
+) -> dict[str, Any]:
     """
     Create multiple records in an Odoo model.
 
@@ -215,11 +217,11 @@ async def create_records(
 
 
 async def write_record(
-    mcp,
+    mcp: Any,
     model_name: str,
     record_id: int,
-    values: dict,
-) -> dict:
+    values: dict[str, Any],
+) -> dict[str, Any]:
     """
     Update a single record in an Odoo model.
 
@@ -243,11 +245,11 @@ async def write_record(
 
 
 async def write_records(
-    mcp,
+    mcp: Any,
     model_name: str,
     record_ids: list[int],
-    values: dict,
-) -> dict:
+    values: dict[str, Any],
+) -> dict[str, Any]:
     """
     Update multiple records in an Odoo model.
 
@@ -271,10 +273,10 @@ async def write_records(
 
 
 async def unlink_record(
-    mcp,
+    mcp: Any,
     model_name: str,
     record_id: int,
-) -> dict:
+) -> dict[str, Any]:
     """
     Delete a single record from an Odoo model.
 
@@ -297,10 +299,10 @@ async def unlink_record(
 
 
 async def unlink_records(
-    mcp,
+    mcp: Any,
     model_name: str,
     record_ids: list[int],
-) -> dict:
+) -> dict[str, Any]:
     """
     Delete multiple records from an Odoo model.
 
@@ -323,10 +325,10 @@ async def unlink_records(
 
 
 async def search_count(
-    mcp,
+    mcp: Any,
     model_name: str,
-    domain: list,
-) -> dict:
+    domain: list[Any],
+) -> dict[str, Any]:
     """
     Count records that match a search domain.
 
@@ -349,13 +351,13 @@ async def search_count(
 
 
 async def search_ids(
-    mcp,
+    mcp: Any,
     model_name: str,
-    domain: list,
+    domain: list[Any],
     offset: int | None = None,
     limit: int | None = None,
     order: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """
     Search for record IDs that match a domain.
 
@@ -383,12 +385,12 @@ async def search_ids(
 
 
 async def call_method(
-    mcp,
+    mcp: Any,
     model_name: str,
     method_name: str,
-    args: list | None = None,
-    kwargs: dict | None = None,
-) -> dict:
+    args: list[Any] | None = None,
+    kwargs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Call a custom method on an Odoo model.
 
@@ -421,11 +423,11 @@ async def call_method(
 
 
 async def search_and_update(
-    mcp,
+    mcp: Any,
     model_name: str,
-    domain: list,
-    values: dict,
-) -> dict:
+    domain: list[Any],
+    values: dict[str, Any],
+) -> dict[str, Any]:
     """
     Search for records and update them in one operation.
 

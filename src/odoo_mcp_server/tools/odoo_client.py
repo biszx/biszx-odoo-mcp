@@ -12,8 +12,14 @@ TABLE OF CONTENTS:
 2. MODEL INTROSPECTION
    - get_models()
    - get_model_info()
-   - get_model_fields()
-   - search_models()
+   - get_model_f            # Build search arguments
+            search_kwargs: dict[str, Any] = {}
+            if offset is not None:
+                search_kwargs["offset"] = offset
+            if limit is not None:
+                search_kwargs["limit"] = limit
+            if order is not None:
+                search_kwargs["order"] = order   - search_models()
 
 3. SEARCH AND READ OPERATIONS
    - search_ids()
@@ -37,12 +43,12 @@ TABLE OF CONTENTS:
 """
 
 import urllib.parse
-from typing import Optional
+from typing import Any, Optional, cast
 
-import odoorpc
+import odoorpc  # type: ignore
 from loguru import logger
-from odoorpc.error import InternalError, RPCError
-from odoorpc.rpc.error import ConnectorError
+from odoorpc.error import InternalError, RPCError  # type: ignore
+from odoorpc.rpc.error import ConnectorError  # type: ignore
 
 from odoo_mcp_server.exceptions import (
     AuthenticationError,
@@ -86,7 +92,7 @@ class OdooClient:
             raise InternalServerError("Not connected to Odoo")
         return self.odoo
 
-    def _connect(self):
+    def _connect(self) -> None:
         """Initialize the OdooRPC connection and authenticate"""
         logger.debug(f"Connecting to Odoo at: {self.config.url}")
         logger.debug(f"Database: {self.config.db}, User: {self.config.username}")
@@ -138,7 +144,7 @@ class OdooClient:
     # MODEL INTROSPECTION
     # ============================================================================
 
-    def search_models(self, query):
+    def search_models(self, query: str) -> dict[str, Any]:
         """
         Search for models that match a query term
 
@@ -179,7 +185,7 @@ class OdooClient:
         except RPCError as e:
             raise OdooRPCError(e, method="search_models") from e
 
-    def get_model_info(self, model_name):
+    def get_model_info(self, model_name: str) -> dict[str, Any]:
         """
         Get information about a specific model
 
@@ -203,11 +209,13 @@ class OdooClient:
             )
             if not result:
                 raise ModelNotFoundError(model_name)
-            return result[0]
+            return cast(dict[str, Any], result[0])
         except RPCError as e:
             raise OdooRPCError(e, method="get_model_info") from e
 
-    def get_model_fields(self, model_name, query: str | None = None):
+    def get_model_fields(
+        self, model_name: str, query: str | None = None
+    ) -> dict[str, Any]:
         """
         Get field definitions for a specific model
 
@@ -226,8 +234,8 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
-            data = Model.fields_get()
-            result = {
+            data: dict[str, Any] = Model.fields_get()
+            result: dict[str, Any] = {
                 "length": 0,
                 "fields": {},
             }
@@ -261,7 +269,14 @@ class OdooClient:
     # SEARCH AND READ OPERATIONS
     # ============================================================================
 
-    def search_ids(self, model_name, domain, offset=None, limit=None, order=None):
+    def search_ids(
+        self,
+        model_name: str,
+        domain: list[Any],
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        order: Optional[str] = None,
+    ) -> list[int]:
         """
         Search for record IDs that match a domain
 
@@ -288,7 +303,7 @@ class OdooClient:
             Model = odoo_conn.env[model_name]  # type: ignore
 
             # Build search kwargs
-            search_kwargs = {}
+            search_kwargs: dict[str, Any] = {}
             if offset is not None:
                 search_kwargs["offset"] = offset
             if limit is not None:
@@ -296,11 +311,11 @@ class OdooClient:
             if order is not None:
                 search_kwargs["order"] = order
 
-            return Model.search(domain, **search_kwargs)
+            return cast(list[int], Model.search(domain, **search_kwargs))
         except RPCError as e:
             raise OdooRPCError(e, method="search_ids") from e
 
-    def search_count(self, model_name, domain):
+    def search_count(self, model_name: str, domain: list[Any]) -> int:
         """
         Count records that match a search domain
 
@@ -320,13 +335,19 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
-            return Model.search_count(domain)
+            return cast(int, Model.search_count(domain))
         except RPCError as e:
             raise OdooRPCError(e, method="search_count") from e
 
     def search_read(
-        self, model_name, domain, fields=None, offset=None, limit=None, order=None
-    ):
+        self,
+        model_name: str,
+        domain: list[Any],
+        fields: Optional[list[str]] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        order: Optional[str] = None,
+    ) -> list[dict[str, Any]]:
         """
         Search for records and read their data in a single call
 
@@ -354,7 +375,7 @@ class OdooClient:
             Model = odoo_conn.env[model_name]  # type: ignore
 
             # Build search_read arguments
-            search_kwargs = {}
+            search_kwargs: dict[str, Any] = {}
             if offset is not None:
                 search_kwargs["offset"] = offset
             if fields is not None:
@@ -364,11 +385,17 @@ class OdooClient:
             if order is not None:
                 search_kwargs["order"] = order
 
-            return Model.search_read(domain, **search_kwargs)
+            result = Model.search_read(domain, **search_kwargs)
+            return cast(list[dict[str, Any]], result)
         except RPCError as e:
             raise OdooRPCError(e, method="search_read") from e
 
-    def read_records(self, model_name, ids, fields=None):
+    def read_records(
+        self,
+        model_name: str,
+        ids: list[int],
+        fields: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
         """
         Read data of records by IDs
 
@@ -395,7 +422,7 @@ class OdooClient:
             else:
                 result = Model.browse(ids).read()
 
-            return result
+            return cast(list[dict[str, Any]], result)
         except RPCError as e:
             raise OdooRPCError(e, method="read_records") from e
 
@@ -403,7 +430,9 @@ class OdooClient:
     # CRUD OPERATIONS
     # ============================================================================
 
-    def create_records(self, model_name, values_list):
+    def create_records(
+        self, model_name: str, values_list: list[dict[str, Any]]
+    ) -> int | list[int]:
         """
         Create records in an Odoo model
 
@@ -425,11 +454,16 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
-            return Model.create(values_list)
+            return cast(int | list[int], Model.create(values_list))
         except RPCError as e:
             raise OdooRPCError(e, method="create_records") from e
 
-    def write_records(self, model_name, record_ids, values):
+    def write_records(
+        self,
+        model_name: str,
+        record_ids: list[int],
+        values: dict[str, Any],
+    ) -> bool:
         """
         Update records in an Odoo model
 
@@ -453,11 +487,11 @@ class OdooClient:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
             records = Model.browse(record_ids)
-            return records.write(values)
+            return cast(bool, records.write(values))
         except RPCError as e:
             raise OdooRPCError(e, method="write_records") from e
 
-    def unlink_records(self, model_name, record_ids):
+    def unlink_records(self, model_name: str, record_ids: list[int]) -> bool:
         """
         Delete records from an Odoo model
 
@@ -478,7 +512,7 @@ class OdooClient:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
             records = Model.browse(record_ids)
-            return records.unlink()
+            return cast(bool, records.unlink())
         except RPCError as e:
             raise OdooRPCError(e, method="unlink_records") from e
 
@@ -486,7 +520,7 @@ class OdooClient:
     # GENERIC METHOD EXECUTION
     # ============================================================================
 
-    def execute_method(self, model, method, *args, **kwargs):
+    def execute_method(self, model: str, method: str, *args: Any, **kwargs: Any) -> Any:
         """
         Execute an arbitrary method on a model
 
@@ -508,7 +542,13 @@ class OdooClient:
         except RPCError as e:
             raise OdooRPCError(e, method=f"execute_method: {model}.{method}") from e
 
-    def call_method(self, model_name, method_name, args, kwargs):
+    def call_method(
+        self,
+        model_name: str,
+        method_name: str,
+        args: list[Any],
+        kwargs: dict[str, Any],
+    ) -> Any:
         """
         Call a custom method on an Odoo model
 
@@ -542,7 +582,7 @@ class OdooClient:
             ) from e
 
 
-def get_odoo_client():
+def get_odoo_client() -> OdooClient:
     """
     Get a configured Odoo client instance
 

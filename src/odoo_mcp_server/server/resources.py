@@ -4,14 +4,14 @@ MCP Resources for Odoo integration
 This module contains all the MCP resource functions for Odoo data access.
 """
 
-from typing import cast
+from typing import Any, cast
 
 from odoo_mcp_server.exceptions import OdooMCPError, ResourceError
 from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.server.response import Response
 
 
-async def search_models_resource(mcp, query: str) -> str:
+async def search_models_resource(mcp: Any, query: str) -> str:
     """
     Resource for searching models from the Odoo application.
 
@@ -43,7 +43,7 @@ async def search_models_resource(mcp, query: str) -> str:
         return Response(error=resource_error.to_dict()).to_json_string()
 
 
-async def get_model_fields_resource(mcp, model_name: str, query_field: str) -> str:
+async def get_model_fields_resource(mcp: Any, model_name: str, query_field: str) -> str:
     """
     Resource containing field definitions for a specific model.
 
@@ -73,7 +73,7 @@ async def get_model_fields_resource(mcp, model_name: str, query_field: str) -> s
         return Response(error=resource_error.to_dict()).to_json_string()
 
 
-async def get_model_info_resource(mcp, model_name: str) -> str:
+async def get_model_info_resource(mcp: Any, model_name: str) -> str:
     """
     Resource containing information about a specific model.
 

@@ -101,7 +101,7 @@ class ConnectionTimeoutError(ConnectionError):
         self,
         message: str = "Connection to Odoo server timed out",
         timeout: Optional[float] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         details = kwargs.get("details", {})
         if timeout is not None:
@@ -118,7 +118,7 @@ class AuthenticationError(ConnectionError):
         message: str = "Authentication with Odoo failed",
         username: Optional[str] = None,
         database: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         details = kwargs.get("details", {})
         if username:
@@ -142,7 +142,7 @@ class ModelNotFoundError(ModelError):
     """Raised when a requested model doesn't exist."""
 
     def __init__(
-        self, model_name: str, message: Optional[str] = None, **kwargs
+        self, model_name: str, message: Optional[str] = None, **kwargs: Any
     ) -> None:
         message = message or f"Model '{model_name}' not found"
         details = kwargs.get("details", {})
@@ -168,7 +168,7 @@ class OdooRPCError(ServerError):
         error: RPCError,
         method: str,
         message: str = "RPC call failed",
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         kwargs["details"] = {
             "method": method,
@@ -197,7 +197,7 @@ class ResourceError(MCPError):
         self,
         message: str = "Resource operation failed",
         resource_name: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         details = kwargs.get("details", {})
         if resource_name:
@@ -213,7 +213,7 @@ class ToolError(MCPError):
         self,
         message: str = "Tool operation failed",
         tool_name: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         details = kwargs.get("details", {})
         if tool_name:

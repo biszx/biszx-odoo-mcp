@@ -5,8 +5,9 @@ Provides MCP tools and resources for interacting with Odoo ERP systems
 """
 
 import inspect
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
+from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
@@ -35,7 +36,7 @@ mcp = FastMCP(
 
 
 # Tool registration helper
-def tool(func):
+def tool(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator to register a tool that calls the underlying function with mcp"""
 
     # Get the original function signature
@@ -45,7 +46,7 @@ def tool(func):
     new_params = [p for name, p in sig.parameters.items() if name != "mcp"]
     new_sig = sig.replace(parameters=new_params)
 
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
         return await func(mcp, *args, **kwargs)
 
     # Set wrapper properties manually to match the new signature
@@ -62,7 +63,7 @@ def tool(func):
 
 
 # Resource wrapper functions
-async def model_fields_resource(model_name: str, query_field: str):
+async def model_fields_resource(model_name: str, query_field: str) -> str:
     """Get field definitions for a specific model"""
     return await resources.get_model_fields_resource(mcp, model_name, query_field)
 

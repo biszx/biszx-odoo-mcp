@@ -4,6 +4,7 @@ Odoo Configuration for MCP server integration
 
 import os
 import re
+from typing import Any
 
 from loguru import logger
 
@@ -34,7 +35,7 @@ class Config:
         logger.info(f"  Timeout: {self.timeout}s")
         logger.info(f"  Verify SSL: {self.verify_ssl}")
 
-    def load_config(self) -> dict:
+    def load_config(self) -> dict[str, Any]:
         """
         Load Odoo configuration from environment variables or config file
 
@@ -55,7 +56,7 @@ class Config:
             in ("1", "true", "yes"),
         }
 
-    def _validate_config(self):
+    def _validate_config(self) -> None:
         """
         Validate the loaded configuration parameters
         Raises:

@@ -5,14 +5,43 @@ Provides MCP tools and resources for interacting with Odoo ERP systems
 """
 
 import inspect
+import os
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from loguru import logger
 from mcp.server.fastmcp import FastMCP
 
 from odoo_mcp_server.server import resources, tools
 from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.tools.odoo_client import get_odoo_client
+
+
+def init() -> None:
+    """
+    Initialize the Odoo MCP Server environment
+    """
+    try:
+        from dotenv import load_dotenv  # pylint: disable=import-outside-toplevel
+
+        load_dotenv()
+    except ImportError:
+        pass
+
+    # Configure loguru with appropriate log level
+    logger.remove()
+    log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+    logger.add(
+        sys.stderr,
+        format=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level: <8}</level> | "
+            "<level>{message}</level>"
+        ),
+        level=log_level,
+        colorize=True,
+    )
 
 
 @asynccontextmanager
@@ -62,38 +91,20 @@ def tool(func):
 
 
 # Resource wrapper functions
-async def models_list_resource():
-    """Get list of all available Odoo models"""
-    return await resources.get_models_resource(mcp)
-
-
-async def model_fields_resource(model_name: str):
+async def model_fields_resource(model_name: str, query_field: str):
     """Get field definitions for a specific model"""
-    return await resources.get_model_fields_resource(mcp, model_name)
+    return await resources.get_model_fields_resource(mcp, model_name, query_field)
 
 
-async def model_info_resource(model_name: str):
-    """Get information about a specific model"""
-    return await resources.get_model_info_resource(mcp, model_name)
-
-
-async def search_models_resource(query: str):
-    """Search for models by name or description"""
-    return await resources.search_models_resource(mcp, query)
-
+init()
 
 # Register all resources directly
-mcp.resource("odoo://models/list")(models_list_resource)
-mcp.resource("odoo://models/{model_name}/fields")(model_fields_resource)
-mcp.resource("odoo://models/{model_name}/info")(model_info_resource)
-mcp.resource("odoo://models/search/{query}")(search_models_resource)
+mcp.resource("odoo://models/{model_name}/fields/{query_field}")(model_fields_resource)
 mcp.resource("odoo://help/domains")(resources.get_domain_help_resource)
 mcp.resource("odoo://help/operations")(resources.get_operations_help_resource)
 
 
 # Register all tools using the helper
-tool(tools.get_odoo_models)
-tool(tools.get_model_info)
 tool(tools.get_model_fields)
 tool(tools.search_records)
 tool(tools.read_records)

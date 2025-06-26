@@ -138,28 +138,46 @@ class OdooClient:
     # MODEL INTROSPECTION
     # ============================================================================
 
-    def get_models(self):
+    def search_models(self, query):
         """
-        Get a list of all available models in the system
+        Search for models that match a query term
+
+        This searches through model names and display names to find models that
+        match the given query term.
+
+        Args:
+            query: Search term to find models (searches in model name and display name)
 
         Returns:
-            Dictionary with model information
+            Dictionary with search results
 
         Examples:
             >>> client = OdooClient(url, db, username, password)
-            >>> models = client.get_models()
-            >>> print(len(models['model_names']))
-            125
-            >>> print(models['model_names'][:5])
-            ['res.partner', 'res.users', 'res.company', 'res.groups', 'ir.model']
+            >>> results = client.search_models('partner')
+            >>> print(results['length'])
+            3
+            >>> print([m['model'] for m in results['models']])
+            ['res.partner', 'res.partner.bank', 'res.partner.category']
         """
         try:
             odoo_conn = self._ensure_connected()
+            domain = ["|", ("model", "like", query), ("name", "like", query)]
             IrModel = odoo_conn.env["ir.model"]  # type: ignore
-            result = IrModel.search_read([], ["model", "name", "info"])
-            return {rec["model"]: rec for rec in result}
+            matching_models = IrModel.search_read(domain, ["model", "name"])
+            return {
+                "query": query,
+                "length": len(matching_models),
+                "models": [
+                    {
+                        "model": model["model"],
+                        "name": model["name"],
+                        "info": model.get("info", ""),
+                    }
+                    for model in matching_models
+                ],
+            }
         except RPCError as e:
-            raise OdooRPCError(e, method="get_models") from e
+            raise OdooRPCError(e, method="search_models") from e
 
     def get_model_info(self, model_name):
         """
@@ -181,7 +199,7 @@ class OdooClient:
             odoo_conn = self._ensure_connected()
             IrModel = odoo_conn.env["ir.model"]  # type: ignore
             result = IrModel.search_read(
-                [("model", "=", model_name)], ["model", "name", "info"]
+                [("model", "=", model_name)], ["model", "name"]
             )
             if not result:
                 raise ModelNotFoundError(model_name)
@@ -189,7 +207,7 @@ class OdooClient:
         except RPCError as e:
             raise OdooRPCError(e, method="get_model_info") from e
 
-    def get_model_fields(self, model_name):
+    def get_model_fields(self, model_name, query: str | None = None):
         """
         Get field definitions for a specific model
 
@@ -208,50 +226,35 @@ class OdooClient:
         try:
             odoo_conn = self._ensure_connected()
             Model = odoo_conn.env[model_name]  # type: ignore
-            return Model.fields_get()
+            data = Model.fields_get()
+            result = {
+                "length": 0,
+                "fields": {},
+            }
+            if query is not None:
+                for value in data.values():
+                    if all(
+                        {
+                            "name" in value,
+                            "related" not in value,
+                            query.lower() in value.get("name", "").lower()
+                            or query.lower() in value.get("string", "").lower(),
+                        }
+                    ):
+                        result["fields"][value["name"]] = {
+                            "name": value["name"],
+                            "string": value.get("string", ""),
+                            "type": value.get("type", ""),
+                            "required": value.get("required", False),
+                            "readonly": value.get("readonly", False),
+                            "searchable": value.get("searchable", False),
+                        }
+            else:
+                result["fields"] = data
+            result["length"] = len(result["fields"])
+            return result
         except RPCError as e:
             raise OdooRPCError(e, method="get_model_fields") from e
-
-    def search_models(self, query):
-        """
-        Search for models that match a query term
-
-        This searches through model names and display names to find models that
-        match the given query term.
-
-        Args:
-            query: Search term to find models (searches in model name and display name)
-
-        Returns:
-            Dictionary with search results
-
-        Examples:
-            >>> client = OdooClient(url, db, username, password)
-            >>> results = client.search_models('partner')
-            >>> print(results['found_models'])
-            3
-            >>> print([m['model'] for m in results['models']])
-            ['res.partner', 'res.partner.bank', 'res.partner.category']
-        """
-        try:
-            odoo_conn = self._ensure_connected()
-            domain = ["|", ("model", "ilike", query), ("name", "ilike", query)]
-            IrModel = odoo_conn.env["ir.model"]  # type: ignore
-            matching_models = IrModel.search_read(domain, ["model", "name", "info"])
-            return {
-                "query": query,
-                "found_models": len(matching_models),
-                "models": [
-                    {
-                        "model": model["model"],
-                        "name": model["name"],
-                        "info": model.get("info", ""),
-                    }
-                    for model in matching_models
-                ],
-            }
-        except RPCError as e:
-            raise OdooRPCError(e, method="search_models") from e
 
     # ============================================================================
     # SEARCH AND READ OPERATIONS

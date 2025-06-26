@@ -11,37 +11,45 @@ from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.server.response import Response
 
 
-async def get_models_resource(mcp) -> str:
+async def search_models_resource(mcp, query: str) -> str:
     """
-    Resource containing list of all available Odoo models.
+    Resource for searching models from the Odoo application.
+
+    This searches through model names and display names to find models that
+    match the given query term.
+
+    Args:
+        query: Search term to find models (searches in model name and display name)
 
     Returns:
-        JSON string with all available models and their descriptions
+        JSON string with matching models
     """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
     try:
-        data = app_context.odoo.get_models()
+        data = app_context.odoo.search_models(query)
         return Response(data=data).to_json_string()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_json_string()
     except Exception as e:
         resource_error = ResourceError(
-            f"Unexpected error getting models: {str(e)}",
-            resource_name="get_models_resource",
+            f"Unexpected error searching models: {str(e)}",
+            resource_name="search_models_resource",
+            details={"query": query},
             original_error=e,
         )
         return Response(error=resource_error.to_dict()).to_json_string()
 
 
-async def get_model_fields_resource(mcp, model_name: str) -> str:
+async def get_model_fields_resource(mcp, model_name: str, query_field: str) -> str:
     """
     Resource containing field definitions for a specific model.
 
     Args:
         model_name: Name of the model (e.g., 'res.partner')
+        query_field: Search term to find fields (searches in field name and string)
 
     Returns:
         JSON string with field definitions
@@ -51,7 +59,7 @@ async def get_model_fields_resource(mcp, model_name: str) -> str:
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
     try:
-        data = app_context.odoo.get_model_fields(model_name)
+        data = app_context.odoo.get_model_fields(model_name, query_field)
         return Response(data=data).to_json_string()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_json_string()
@@ -220,35 +228,3 @@ async def get_operations_help_resource() -> str:
 
     response = Response(data=operations_help)
     return response.to_json_string()
-
-
-async def search_models_resource(mcp, query: str) -> str:
-    """
-    Resource for searching models from the Odoo application.
-
-    This searches through model names and display names to find models that
-    match the given query term.
-
-    Args:
-        query: Search term to find models (searches in model name and display name)
-
-    Returns:
-        JSON string with matching models
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        data = app_context.odoo.search_models(query)
-        return Response(data=data).to_json_string()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_json_string()
-    except Exception as e:
-        resource_error = ResourceError(
-            f"Unexpected error searching models: {str(e)}",
-            resource_name="search_models_resource",
-            details={"query": query},
-            original_error=e,
-        )
-        return Response(error=resource_error.to_dict()).to_json_string()

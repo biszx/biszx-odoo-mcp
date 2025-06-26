@@ -11,26 +11,29 @@ from odoo_mcp_server.server.context import AppContext
 from odoo_mcp_server.server.response import Response
 
 
-async def get_odoo_models(mcp) -> dict:
+async def search_models(mcp, query: str) -> dict:
     """
     Get a list of all available models in the Odoo system.
 
+    Args:
+        query: Search term to find models (searches in model name and display name)
+
     Returns:
-        Dictionary with model information
+        JSON string with matching models
     """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
     try:
-        data = app_context.odoo.get_models()
+        data = app_context.odoo.search_models(query)
         return Response(data=data).to_dict()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_dict()
     except Exception as e:
         tool_error = ToolError(
             f"Unexpected error getting models: {str(e)}",
-            tool_name="get_odoo_models",
+            tool_name="search_models",
             original_error=e,
         )
         return Response(error=tool_error.to_dict()).to_dict()
@@ -65,12 +68,13 @@ async def get_model_info(mcp, model_name: str) -> dict:
         return Response(error=tool_error.to_dict()).to_dict()
 
 
-async def get_model_fields(mcp, model_name: str) -> dict:
+async def get_model_fields(mcp, model_name: str, query_field: str) -> dict:
     """
     Get field definitions for a specific Odoo model.
 
     Args:
         model_name: Name of the model (e.g., 'res.partner')
+        query_field: Search term to find fields (searches in field name and string)
 
     Returns:
         Dictionary with field definitions
@@ -80,7 +84,7 @@ async def get_model_fields(mcp, model_name: str) -> dict:
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
     try:
-        data = app_context.odoo.get_model_fields(model_name)
+        data = app_context.odoo.get_model_fields(model_name, query_field)
         return Response(data=data).to_dict()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_dict()

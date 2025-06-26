@@ -64,7 +64,6 @@ class TestToolDecorator:
         """Test that tool decorator properly wraps functions"""
 
         # Create a mock function
-        # pylint: disable=unused-argument
         async def mock_function(mcp_instance, param1, param2="default"):
             return {"param1": param1, "param2": param2}
 
@@ -81,7 +80,6 @@ class TestToolDecorator:
     def test_tool_decorator_signature_modification(self):
         """Test that tool decorator removes mcp parameter from signature"""
 
-        # pylint: disable=unused-argument
         async def sample_function(mcp_instance, param1, param2="default"):
             return {"param1": param1, "param2": param2}
 

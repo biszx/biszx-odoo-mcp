@@ -94,7 +94,7 @@ class TestMain:
         )
 
         # Should return 0 for success
-        assert result == 0
+        assert result == 0  # Intentionally checking exact value, not truthiness
 
     @patch("odoo_mcp_server.__main__.mcp")
     @patch("odoo_mcp_server.__main__.logger")
@@ -116,7 +116,7 @@ class TestMain:
         )
 
         # Should return 0 for graceful shutdown
-        assert result == 0
+        assert result == 0  # Intentionally checking exact value, not truthiness
 
     @patch("odoo_mcp_server.__main__.mcp")
     @patch("odoo_mcp_server.__main__.logger")
@@ -212,7 +212,7 @@ class TestMainModule:
 
     def test_main_module_import(self):
         """Test that the main module can be imported"""
-        import odoo_mcp_server.__main__  # pylint: disable=import-outside-toplevel
+        import odoo_mcp_server.__main__
 
         assert hasattr(odoo_mcp_server.__main__, "main")
         assert hasattr(odoo_mcp_server.__main__, "init")
@@ -230,9 +230,8 @@ class TestMainModule:
             # Import and execute the module
             exec(  # pylint: disable=exec-used
                 compile(
-                    open(  # pylint: disable=consider-using-with
-                        "src/odoo_mcp_server/__main__.py", encoding="utf-8"
-                    ).read(),  # pylint: disable=unspecified-encoding
+                    # pylint: disable-next=consider-using-with
+                    open("src/odoo_mcp_server/__main__.py", encoding="utf-8").read(),
                     "src/odoo_mcp_server/__main__.py",
                     "exec",
                 )
@@ -241,11 +240,9 @@ class TestMainModule:
         # Note: This test is somewhat limited because we can't easily
         # test the actual if __name__ == "__main__" block without
         # more complex mocking
-        # more complex mocking
 
     def test_docstring_and_module_structure(self):
         """Test module docstring and basic structure"""
-        # pylint: disable=import-outside-toplevel
         import odoo_mcp_server.__main__ as main_module
 
         # Verify module has a docstring

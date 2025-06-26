@@ -205,7 +205,6 @@ class TestConfig:
             config = Config()
 
             # Test various URL formats
-            # pylint: disable=protected-access
             assert config._prepare_url("example.com") == "http://example.com"
             assert config._prepare_url("http://example.com") == "http://example.com"
             assert config._prepare_url("https://example.com") == "https://example.com"
@@ -220,7 +219,6 @@ class TestConfig:
             config = Config()
 
             # This should not raise any exception with valid environment
-            # pylint: disable=protected-access
             config._validate_config()
 
             # Test invalid timeout

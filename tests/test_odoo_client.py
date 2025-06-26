@@ -422,7 +422,6 @@ class TestOdooClientUtilityMethods:
 
     def test_ensure_connected_success(self, mock_odoo_client):
         """Test _ensure_connected with valid connection"""
-        # pylint: disable=protected-access
         result = mock_odoo_client._ensure_connected()
         assert result == mock_odoo_client.odoo
 
@@ -436,14 +435,13 @@ class TestOdooClientUtilityMethods:
             client.uid = None
 
             with pytest.raises(InternalServerError, match="Not connected to Odoo"):
-                client._ensure_connected()  # pylint: disable=protected-access
+                client._ensure_connected()
 
     def test_get_model_success(self, mock_odoo_client):
         """Test _get_model method"""
         mock_model = Mock()
         mock_odoo_client.odoo.env = {"res.partner": mock_model}
 
-        # pylint: disable=protected-access
         result = mock_odoo_client._get_model("res.partner")
         assert result == mock_model
 

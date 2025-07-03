@@ -81,6 +81,10 @@ class OdooModelProtocol(Protocol):
         """Get field definitions"""
         ...
 
+    def check_access_rights(self, operation: str, raise_exception: bool = True) -> bool:
+        """Check access rights for the given operation"""
+        ...
+
 
 class OdooClient:
     """
@@ -192,8 +196,9 @@ class OdooClient:
             ['res.partner', 'res.partner.bank', 'res.partner.category']
         """
         try:
-            domain = ["|", ("model", "like", query), ("name", "like", query)]
             IrModel = self._get_model("ir.model")
+            IrModel.check_access_rights("read")
+            domain = ["|", ("model", "like", query), ("name", "like", query)]
             matching_models = IrModel.search_read(domain, ["model", "name"])
             return {
                 "query": query,
@@ -202,7 +207,6 @@ class OdooClient:
                     {
                         "model": model["model"],
                         "name": model["name"],
-                        "info": model.get("info", ""),
                     }
                     for model in matching_models
                 ],
@@ -228,6 +232,7 @@ class OdooClient:
         """
         try:
             IrModel = self._get_model("ir.model")
+            IrModel.check_access_rights("read")
             result = IrModel.search_read(
                 [("model", "=", model_name)], ["model", "name"]
             )

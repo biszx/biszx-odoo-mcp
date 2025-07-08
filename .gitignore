@@ -31,9 +31,6 @@ logs/
 .env.test.local
 .env.production.local
 
-# Odoo specific
-odoo_config.json
-
 # System files
 .DS_Store
 Thumbs.db

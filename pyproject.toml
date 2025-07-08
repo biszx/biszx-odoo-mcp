@@ -24,8 +24,6 @@ dependencies = [
     "loguru>=0.7.3",
     "mcp[cli]>=1.9.4",
     "odoorpc>=0.10.1",
-    "pytest>=8.4.1",
-    "pytest-cov>=6.2.1",
 ]
 
 [project.urls]
@@ -45,6 +43,8 @@ dev = [
     "mypy>=1.16.1",
     "pre-commit>=4.2.0",
     "pylint>=3.3.7",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
     "pytest-asyncio>=1.0.0",
     "python-dotenv>=1.1.1",
     "ruff>=0.12.0",

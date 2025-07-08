@@ -15,9 +15,7 @@ jobs:
       - name: Install the latest version of uv and set the python version
         uses: astral-sh/setup-uv@v6
         with:
-          python-version: 3.10
           enable-cache: true
-          cache-dependency-glob: uv.lock
       - name: Build
         run: uv build
       - name: Publish

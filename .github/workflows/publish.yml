@@ -3,9 +3,6 @@ name: Publish to PyPI
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - develop
 
 jobs:
   deploy:
@@ -18,5 +15,5 @@ jobs:
           enable-cache: true
       - name: Build
         run: uv build
-      # - name: Publish
-      #   run: uv publish -t ${{ secrets.PYPI_API_TOKEN }}
+      - name: Publish
+        run: uv publish -t ${{ secrets.PYPI_API_TOKEN }}

@@ -16,7 +16,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - name: Build
-        run: uv build
-      - name: Publish
-        run: uv publish -t ${{ secrets.PYPI_API_TOKEN }}
+      # - name: Build
+      #   run: uv build
+      # - name: Publish
+      #   run: uv publish -t ${{ secrets.PYPI_API_TOKEN }}

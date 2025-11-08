@@ -59,6 +59,16 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 
 ### Model Operations
 
+- **search_models**: Search for available models in the Odoo system
+
+  - Inputs: `query` (string) - Search term for model names and display names
+  - Returns: Dictionary with matching models
+
+- **get_model_info**: Get information about a specific model
+
+  - Inputs: `model_name` (string)
+  - Returns: Dictionary with model information
+
 - **get_model_fields**: Get field definitions for a model
   - Inputs: `model_name` (string), `query_field` (string)
   - Returns: Dictionary with field definitions
@@ -79,6 +89,8 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 
 ### Model Information
 
+- **odoo://models/search/{query}**: Search for models by name or description
+- **odoo://models/{model_name}/info**: Information about a specific model
 - **odoo://models/{model_name}/fields**: Field definitions for a specific model
 
 ### Documentation
@@ -134,6 +146,9 @@ pip install odoo-mcp-server
 ```bash
 # Using the installed package
 odoo-mcp-server
+
+# Using uv for development
+uv run odoo-mcp-server
 
 # Using the MCP development tools
 uv run mcp dev src/odoo_mcp_server/main.py

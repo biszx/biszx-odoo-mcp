@@ -1,8 +1,8 @@
 """
-Tests for odoo_mcp_server.exceptions module
+Tests for biszx_odoo_mcp.exceptions module
 """
 
-from odoo_mcp_server.exceptions import (
+from biszx_odoo_mcp.exceptions import (
     AuthenticationError,
     ConnectionTimeoutError,
     InternalServerError,

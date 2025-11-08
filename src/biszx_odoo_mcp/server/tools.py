@@ -6,9 +6,9 @@ This module contains all the MCP tool functions for interacting with Odoo.
 
 from typing import Any, cast
 
-from odoo_mcp_server.exceptions import OdooMCPError, ToolError
-from odoo_mcp_server.server.context import AppContext
-from odoo_mcp_server.server.response import Response
+from biszx_odoo_mcp.exceptions import OdooMCPError, ToolError
+from biszx_odoo_mcp.server.context import AppContext
+from biszx_odoo_mcp.server.response import Response
 
 
 async def search_models(mcp: Any, query: str) -> dict[str, Any]:

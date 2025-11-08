@@ -26,10 +26,3 @@ repos:
     rev: 7.2.0
     hooks:
       - id: flake8
-  - repo: local
-    hooks:
-      - id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [python]

@@ -1,18 +1,18 @@
 """
-Tests for odoo_mcp_server.tools.odoo_client module
+Tests for biszx_odoo_mcp.tools.odoo_client module
 """
 
 from unittest.mock import Mock, patch
 
 import pytest
-from odoo_mcp_server.exceptions import (
+from biszx_odoo_mcp.exceptions import (
     AuthenticationError,
     ConnectionTimeoutError,
     InternalServerError,
     ModelNotFoundError,
     OdooRPCError,
 )
-from odoo_mcp_server.tools.odoo_client import OdooClient, get_odoo_client
+from biszx_odoo_mcp.tools.odoo_client import OdooClient, get_odoo_client
 from odoorpc.error import InternalError, RPCError
 from odoorpc.rpc.error import ConnectorError
 
@@ -20,8 +20,8 @@ from odoorpc.rpc.error import ConnectorError
 class TestOdooClientInitialization:
     """Test cases for OdooClient initialization and connection"""
 
-    @patch("odoo_mcp_server.tools.odoo_client.odoorpc.ODOO")
-    @patch("odoo_mcp_server.tools.odoo_client.logger")
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.logger")
     def test_successful_initialization(self, mock_logger, mock_odoo_rpc, mock_config):
         """Test successful client initialization"""
         # Setup mock
@@ -48,7 +48,7 @@ class TestOdooClientInitialization:
         # Verify logging
         mock_logger.info.assert_called()
 
-    @patch("odoo_mcp_server.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
     def test_authentication_error(self, mock_odoo_rpc, mock_config):
         """Test authentication error handling"""
         mock_odoo_instance = Mock()
@@ -61,7 +61,7 @@ class TestOdooClientInitialization:
         with pytest.raises(AuthenticationError):
             OdooClient(mock_config)
 
-    @patch("odoo_mcp_server.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
     def test_connection_timeout_error(self, mock_odoo_rpc, mock_config):
         """Test connection timeout error handling"""
         mock_odoo_instance = Mock()
@@ -74,7 +74,7 @@ class TestOdooClientInitialization:
         with pytest.raises(ConnectionTimeoutError):
             OdooClient(mock_config)
 
-    @patch("odoo_mcp_server.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
     def test_internal_error(self, mock_odoo_rpc, mock_config):
         """Test internal error handling"""
         mock_odoo_instance = Mock()
@@ -428,7 +428,7 @@ class TestOdooClientUtilityMethods:
     def test_ensure_connected_no_connection(self, mock_config):
         """Test _ensure_connected with no connection"""
         # Create client without mocking the connection
-        with patch("odoo_mcp_server.tools.odoo_client.odoorpc.ODOO"):
+        with patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO"):
             client = OdooClient.__new__(OdooClient)
             client.config = mock_config
             client.odoo = None
@@ -449,8 +449,8 @@ class TestOdooClientUtilityMethods:
 class TestGetOdooClient:
     """Test cases for the get_odoo_client function"""
 
-    @patch("odoo_mcp_server.tools.odoo_client.Config")
-    @patch("odoo_mcp_server.tools.odoo_client.OdooClient")
+    @patch("biszx_odoo_mcp.tools.odoo_client.Config")
+    @patch("biszx_odoo_mcp.tools.odoo_client.OdooClient")
     def test_get_odoo_client(self, mock_odoo_client_class, mock_config_class):
         """Test get_odoo_client function"""
         mock_config = Mock()

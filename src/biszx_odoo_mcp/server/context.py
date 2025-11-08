@@ -7,7 +7,7 @@ the Odoo client used to interact with the Odoo server.
 
 from dataclasses import dataclass
 
-from odoo_mcp_server.tools.odoo_client import OdooClient
+from biszx_odoo_mcp.tools.odoo_client import OdooClient
 
 
 @dataclass

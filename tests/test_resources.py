@@ -1,12 +1,12 @@
 """
-Tests for odoo_mcp_server.server.resources module
+Tests for biszx_odoo_mcp.server.resources module
 """
 
 import json
 
 import pytest
-from odoo_mcp_server.exceptions import MCPError, OdooMCPError, ResourceError
-from odoo_mcp_server.server import resources
+from biszx_odoo_mcp.exceptions import MCPError, OdooMCPError, ResourceError
+from biszx_odoo_mcp.server import resources
 
 
 def get_mock_odoo(mock_mcp_server_for_tools):

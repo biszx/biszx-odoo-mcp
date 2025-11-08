@@ -14,9 +14,9 @@ from typing import Any
 from loguru import logger
 from mcp.server.fastmcp import FastMCP
 
-from odoo_mcp_server.server import resources, tools
-from odoo_mcp_server.server.context import AppContext
-from odoo_mcp_server.tools.odoo_client import get_odoo_client
+from biszx_odoo_mcp.server import resources, tools
+from biszx_odoo_mcp.server.context import AppContext
+from biszx_odoo_mcp.tools.odoo_client import get_odoo_client
 
 
 def init() -> None:

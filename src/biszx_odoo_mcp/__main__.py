@@ -6,8 +6,8 @@ import sys
 
 from loguru import logger
 
-from odoo_mcp_server.exceptions import OdooMCPError
-from odoo_mcp_server.main import mcp
+from biszx_odoo_mcp.exceptions import OdooMCPError
+from biszx_odoo_mcp.main import mcp
 
 
 def main() -> int:

@@ -42,14 +42,14 @@ from loguru import logger
 from odoorpc.error import InternalError, RPCError  # type: ignore
 from odoorpc.rpc.error import ConnectorError  # type: ignore
 
-from odoo_mcp_server.exceptions import (
+from biszx_odoo_mcp.exceptions import (
     AuthenticationError,
     ConnectionTimeoutError,
     InternalServerError,
     ModelNotFoundError,
     OdooRPCError,
 )
-from odoo_mcp_server.tools.config import Config
+from biszx_odoo_mcp.tools.config import Config
 
 
 class OdooModelProtocol(Protocol):

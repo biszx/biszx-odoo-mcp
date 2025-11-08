@@ -1,10 +1,10 @@
 """
-Tests for odoo_mcp_server.server.context module
+Tests for biszx_odoo_mcp.server.context module
 """
 
 from unittest.mock import Mock
 
-from odoo_mcp_server.server.context import AppContext
+from biszx_odoo_mcp.server.context import AppContext
 
 
 class TestAppContext:

@@ -1,18 +1,18 @@
 """
-Tests for odoo_mcp_server.main module
+Tests for biszx_odoo_mcp.main module
 """
 
 from unittest.mock import Mock, patch
 
 import pytest
-from odoo_mcp_server.main import app_lifespan, mcp, tool
+from biszx_odoo_mcp.main import app_lifespan, mcp, tool
 
 
 class TestAppLifespan:
     """Test cases for app_lifespan context manager"""
 
     @pytest.mark.asyncio
-    @patch("odoo_mcp_server.main.get_odoo_client")
+    @patch("biszx_odoo_mcp.main.get_odoo_client")
     async def test_app_lifespan_success(self, mock_get_odoo_client):
         """Test successful app lifespan context manager"""
         mock_odoo_client = Mock()
@@ -24,7 +24,7 @@ class TestAppLifespan:
             assert hasattr(context, "odoo")
 
     @pytest.mark.asyncio
-    @patch("odoo_mcp_server.main.get_odoo_client")
+    @patch("biszx_odoo_mcp.main.get_odoo_client")
     async def test_app_lifespan_cleanup(self, mock_get_odoo_client):
         """Test app lifespan cleanup (should not raise exceptions)"""
         mock_odoo_client = Mock()
@@ -134,7 +134,7 @@ class TestToolRegistration:
 
     def test_tool_registration_imports(self):
         """Test that all tools are imported and accessible"""
-        from odoo_mcp_server.server import tools
+        from biszx_odoo_mcp.server import tools
 
         # Verify that all the tools exist and are callable
         assert hasattr(tools, "get_model_fields")
@@ -185,8 +185,8 @@ class TestResourceWrapperFunctions:
         """Test the model_fields_resource wrapper function"""
         from unittest.mock import patch
 
-        from odoo_mcp_server.main import model_fields_resource
-        from odoo_mcp_server.server import resources
+        from biszx_odoo_mcp.main import model_fields_resource
+        from biszx_odoo_mcp.server import resources
 
         with patch.object(resources, "get_model_fields_resource") as mock_resource:
             mock_resource.return_value = '{"success": true, "data": {}}'

@@ -15,8 +15,8 @@ import os
 from unittest.mock import Mock, patch
 
 import pytest
-from odoo_mcp_server.server.context import AppContext
-from odoo_mcp_server.tools.odoo_client import OdooClient
+from biszx_odoo_mcp.server.context import AppContext
+from biszx_odoo_mcp.tools.odoo_client import OdooClient
 from odoorpc.error import RPCError
 
 

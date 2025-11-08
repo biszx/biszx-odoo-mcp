@@ -1,10 +1,10 @@
 """
-Tests for odoo_mcp_server.server.response module
+Tests for biszx_odoo_mcp.server.response module
 """
 
 import json
 
-from odoo_mcp_server.server.response import Response
+from biszx_odoo_mcp.server.response import Response
 
 
 class TestResponse:

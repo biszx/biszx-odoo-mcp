@@ -121,7 +121,7 @@ Add this to your `claude_desktop_config.json`:
   "mcpServers": {
     "odoo": {
       "command": "uvx",
-      "args": ["odoo-mcp-server"],
+      "args": ["biszx-odoo-mcp"],
       "env": {
         "ODOO_URL": "https://your-odoo-instance.com",
         "ODOO_DB": "your-database-name",
@@ -138,20 +138,20 @@ Add this to your `claude_desktop_config.json`:
 ### Python Package
 
 ```bash
-pip install odoo-mcp-server
+pip install biszx-odoo-mcp
 ```
 
 ### Running the Server
 
 ```bash
 # Using the installed package
-odoo-mcp-server
+biszx-odoo-mcp
 
 # Using uv for development
-uv run odoo-mcp-server
+uv run biszx-odoo-mcp
 
 # Using the MCP development tools
-uv run mcp dev src/odoo_mcp_server/main.py
+uv run mcp dev src/biszx_odoo_mcp/main.py
 ```
 
 ## License

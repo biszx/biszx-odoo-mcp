@@ -1,10 +1,10 @@
 """
-Tests for odoo_mcp_server.server.tools module
+Tests for biszx_odoo_mcp.server.tools module
 """
 
 import pytest
-from odoo_mcp_server.exceptions import OdooMCPError
-from odoo_mcp_server.server import tools
+from biszx_odoo_mcp.exceptions import OdooMCPError
+from biszx_odoo_mcp.server import tools
 
 
 def get_mock_odoo(mock_mcp_server):

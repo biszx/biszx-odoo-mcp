@@ -1,12 +1,12 @@
 """
-Tests for odoo_mcp_server.tools.config module
+Tests for biszx_odoo_mcp.tools.config module
 """
 
 import os
 from unittest.mock import patch
 
 import pytest
-from odoo_mcp_server.tools.config import Config
+from biszx_odoo_mcp.tools.config import Config
 
 
 class TestConfig:
@@ -15,7 +15,7 @@ class TestConfig:
     def test_initialization_with_valid_env(self, mock_env_vars):
         """Test successful initialization with valid environment variables"""
         # Use the mock_env_vars fixture to set up environment
-        with patch("odoo_mcp_server.tools.config.logger") as mock_logger:
+        with patch("biszx_odoo_mcp.tools.config.logger") as mock_logger:
             config = Config()
 
             assert config.url == "https://test.odoo.com"  # https:// from fixture
@@ -74,7 +74,7 @@ class TestConfig:
                 del os.environ[var]
 
         try:
-            with patch("odoo_mcp_server.tools.config.logger"):
+            with patch("biszx_odoo_mcp.tools.config.logger"):
                 config = Config()
 
                 # Check defaults
@@ -89,7 +89,7 @@ class TestConfig:
         """Test custom timeout value"""
         os.environ["ODOO_TIMEOUT"] = "60"
 
-        with patch("odoo_mcp_server.tools.config.logger"):
+        with patch("biszx_odoo_mcp.tools.config.logger"):
             config = Config()
             assert config.timeout == 60
 
@@ -107,13 +107,13 @@ class TestConfig:
 
         for value in true_values:
             os.environ["ODOO_VERIFY_SSL"] = value
-            with patch("odoo_mcp_server.tools.config.logger"):
+            with patch("biszx_odoo_mcp.tools.config.logger"):
                 config = Config()
                 assert config.verify_ssl is True, f"Failed for value: {value}"
 
         for value in false_values:
             os.environ["ODOO_VERIFY_SSL"] = value
-            with patch("odoo_mcp_server.tools.config.logger"):
+            with patch("biszx_odoo_mcp.tools.config.logger"):
                 config = Config()
                 assert config.verify_ssl is False, f"Failed for value: {value}"
 
@@ -128,7 +128,7 @@ class TestConfig:
         """Test URL preparation adds http:// when missing"""
         os.environ["ODOO_URL"] = "example.com"
 
-        with patch("odoo_mcp_server.tools.config.logger"):
+        with patch("biszx_odoo_mcp.tools.config.logger"):
             config = Config()
             assert config.url == "http://example.com"
 
@@ -136,7 +136,7 @@ class TestConfig:
         """Test URL preparation preserves http://"""
         os.environ["ODOO_URL"] = "http://example.com"
 
-        with patch("odoo_mcp_server.tools.config.logger"):
+        with patch("biszx_odoo_mcp.tools.config.logger"):
             config = Config()
             assert config.url == "http://example.com"
 
@@ -144,7 +144,7 @@ class TestConfig:
         """Test URL preparation preserves https://"""
         os.environ["ODOO_URL"] = "https://example.com"
 
-        with patch("odoo_mcp_server.tools.config.logger"):
+        with patch("biszx_odoo_mcp.tools.config.logger"):
             config = Config()
             assert config.url == "https://example.com"
 
@@ -158,13 +158,13 @@ class TestConfig:
 
         for input_url, expected_url in test_cases:
             os.environ["ODOO_URL"] = input_url
-            with patch("odoo_mcp_server.tools.config.logger"):
+            with patch("biszx_odoo_mcp.tools.config.logger"):
                 config = Config()
                 assert config.url == expected_url, f"Failed for URL: {input_url}"
 
     def test_load_config_return_value(self, mock_env_vars):
         """Test that load_config returns the expected dictionary"""
-        with patch("odoo_mcp_server.tools.config.logger"):
+        with patch("biszx_odoo_mcp.tools.config.logger"):
             config = Config()
             config_dict = config.load_config()
 
@@ -187,7 +187,7 @@ class TestConfig:
 
     def test_config_logging_output(self, mock_env_vars):
         """Test that configuration is properly logged"""
-        with patch("odoo_mcp_server.tools.config.logger") as mock_logger:
+        with patch("biszx_odoo_mcp.tools.config.logger") as mock_logger:
             Config()
 
             # Verify that configuration info is logged
@@ -201,7 +201,7 @@ class TestConfig:
 
     def test_private_prepare_url_method(self, mock_env_vars):
         """Test the _prepare_url private method directly"""
-        with patch("odoo_mcp_server.tools.config.logger"):
+        with patch("biszx_odoo_mcp.tools.config.logger"):
             config = Config()
 
             # Test various URL formats
@@ -215,7 +215,7 @@ class TestConfig:
 
     def test_private_validate_config_method(self, mock_env_vars):
         """Test the _validate_config private method"""
-        with patch("odoo_mcp_server.tools.config.logger"):
+        with patch("biszx_odoo_mcp.tools.config.logger"):
             config = Config()
 
             # This should not raise any exception with valid environment

@@ -34,4 +34,4 @@ RUN chmod +x run_server.py
 ENV PYTHONUNBUFFERED=1
 
 # Run the custom MCP server script instead of the module
-ENTRYPOINT ["python", "run_server.py"] 
+ENTRYPOINT ["python", "run_server.py"]

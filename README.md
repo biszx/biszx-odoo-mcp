@@ -1,86 +1,116 @@
 # Odoo MCP Server
 
-An MCP server implementation that integrates with Odoo ERP systems, enabling AI assistants to interact with Odoo data and functionality through the Model Context Protocol.
-
-## Features
-
-* **Comprehensive Odoo Integration**: Full access to Odoo models, records, and methods
-* **XML-RPC Communication**: Secure connection to Odoo instances via XML-RPC
-* **Flexible Configuration**: Support for config files and environment variables
-* **Resource Pattern System**: URI-based access to Odoo data structures
-* **Error Handling**: Clear error messages for common Odoo API issues
-* **Stateless Operations**: Clean request/response cycle for reliable integration
+An MCP server implementation for Odoo ERP systems, providing a set of tools for managing Odoo records, models, and custom methods.
+Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 
 ## Tools
 
-* **execute_method**
-  * Execute a custom method on an Odoo model
-  * Inputs:
-    * `model` (string): The model name (e.g., 'res.partner')
-    * `method` (string): Method name to execute
-    * `args` (optional array): Positional arguments
-    * `kwargs` (optional object): Keyword arguments
-  * Returns: Dictionary with the method result and success indicator
+### Core CRUD Operations
 
-* **search_employee**
-  * Search for employees by name
-  * Inputs:
-    * `name` (string): The name (or part of the name) to search for
-    * `limit` (optional number): The maximum number of results to return (default 20)
-  * Returns: Object containing success indicator, list of matching employee names and IDs, and any error message
+- **create_record**: Create a single new record
 
-* **search_holidays**
-  * Searches for holidays within a specified date range
-  * Inputs:
-    * `start_date` (string): Start date in YYYY-MM-DD format
-    * `end_date` (string): End date in YYYY-MM-DD format
-    * `employee_id` (optional number): Optional employee ID to filter holidays
-  * Returns: Object containing success indicator, list of holidays found, and any error message
+  - Inputs: `model_name` (string), `values` (object)
+  - Returns: Dictionary with created record ID
+
+- **create_records**: Create multiple records at once
+
+  - Inputs: `model_name` (string), `values_list` (array of objects)
+  - Returns: Dictionary with created record IDs
+
+- **read_records**: Read specific records by their IDs
+
+  - Inputs: `model_name` (string), `ids` (array), `fields` (optional array)
+  - Returns: Dictionary with record data
+
+- **write_record**: Update a single record
+
+  - Inputs: `model_name` (string), `record_id` (number), `values` (object)
+  - Returns: Dictionary with operation result
+
+- **write_records**: Update multiple records
+
+  - Inputs: `model_name` (string), `record_ids` (array), `values` (object)
+  - Returns: Dictionary with operation result
+
+- **unlink_record**: Delete a single record
+
+  - Inputs: `model_name` (string), `record_id` (number)
+  - Returns: Dictionary with operation result
+
+- **unlink_records**: Delete multiple records
+  - Inputs: `model_name` (string), `record_ids` (array)
+  - Returns: Dictionary with operation result
+
+### Search and Query Operations
+
+- **search_records**: Search for records with advanced filtering
+
+  - Inputs: `model_name` (string), `domain` (array), `fields` (optional array), `limit` (optional number), `offset` (optional number), `order` (optional string)
+  - Returns: Dictionary with matching records
+
+- **search_ids**: Get only IDs of matching records
+
+  - Inputs: `model_name` (string), `domain` (array), `offset` (optional number), `limit` (optional number), `order` (optional string)
+  - Returns: Dictionary with list of IDs
+
+- **search_count**: Count records matching a domain
+  - Inputs: `model_name` (string), `domain` (array)
+  - Returns: Dictionary with count
+
+### Model Operations
+
+- **search_models**: Search for available models in the Odoo system
+
+  - Inputs: `query` (string) - Search term for model names and display names
+  - Returns: Dictionary with matching models
+
+- **get_model_info**: Get information about a specific model
+
+  - Inputs: `model_name` (string)
+  - Returns: Dictionary with model information
+
+- **get_model_fields**: Get field definitions for a model
+  - Inputs: `model_name` (string), `query_field` (string)
+  - Returns: Dictionary with field definitions
+
+### Utility Operations
+
+- **search_and_update**: Search and update records in one operation
+
+  - Inputs: `model_name` (string), `domain` (array), `values` (object)
+  - Returns: Dictionary with affected record count and IDs
+
+- **call_method**: Call custom methods on models
+
+  - Inputs: `model_name` (string), `method_name` (string), `args` (optional array), `kwargs` (optional object)
+  - Returns: Dictionary with method result
 
 ## Resources
 
-* **odoo://models**
-  * Lists all available models in the Odoo system
-  * Returns: JSON array of model information
+### Model Information
 
-* **odoo://model/{model_name}**
-  * Get information about a specific model including fields
-  * Example: `odoo://model/res.partner`
-  * Returns: JSON object with model metadata and field definitions
+- **odoo://models/search/{query}**: Search for models by name or description
+- **odoo://models/{model_name}/info**: Information about a specific model
+- **odoo://models/{model_name}/fields**: Field definitions for a specific model
 
-* **odoo://record/{model_name}/{record_id}**
-  * Get a specific record by ID
-  * Example: `odoo://record/res.partner/1`
-  * Returns: JSON object with record data
+### Documentation
 
-* **odoo://search/{model_name}/{domain}**
-  * Search for records that match a domain
-  * Example: `odoo://search/res.partner/[["is_company","=",true]]`
-  * Returns: JSON array of matching records (limited to 10 by default)
+- **odoo://help/domains**: Complete guide to Odoo domain syntax with examples
+- **odoo://help/operations**: Documentation of all available MCP tools and workflows
 
 ## Configuration
 
 ### Odoo Connection Setup
 
-1. Create a configuration file named `odoo_config.json`:
+To connect to your Odoo instance, set the following environment variables:
 
-```json
-{
-  "url": "https://your-odoo-instance.com",
-  "db": "your-database-name",
-  "username": "your-username",
-  "password": "your-password-or-api-key"
-}
-```
-
-2. Alternatively, use environment variables:
-   * `ODOO_URL`: Your Odoo server URL
-   * `ODOO_DB`: Database name
-   * `ODOO_USERNAME`: Login username
-   * `ODOO_PASSWORD`: Password or API key
-   * `ODOO_TIMEOUT`: Connection timeout in seconds (default: 30)
-   * `ODOO_VERIFY_SSL`: Whether to verify SSL certificates (default: true)
-   * `HTTP_PROXY`: Force the ODOO connection to use an HTTP proxy
+- `ODOO_URL`: Your Odoo server URL
+- `ODOO_DB`: Database name
+- `ODOO_USERNAME`: Login username
+- `ODOO_PASSWORD`: Password or API key
+- `ODOO_TIMEOUT`: Connection timeout in seconds (default: 30)
+- `ODOO_VERIFY_SSL`: Whether to verify SSL certificates (default: true)
+- `LOG_LEVEL`: Logging level (default: INFO)
 
 ### Usage with Claude Desktop
 
@@ -90,43 +120,8 @@ Add this to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "odoo": {
-      "command": "python",
-      "args": [
-        "-m",
-        "odoo_mcp"
-      ],
-      "env": {
-        "ODOO_URL": "https://your-odoo-instance.com",
-        "ODOO_DB": "your-database-name",
-        "ODOO_USERNAME": "your-username",
-        "ODOO_PASSWORD": "your-password-or-api-key"
-      }
-    }
-  }
-}
-```
-
-### Docker
-
-```json
-{
-  "mcpServers": {
-    "odoo": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "ODOO_URL",
-        "-e",
-        "ODOO_DB",
-        "-e",
-        "ODOO_USERNAME",
-        "-e",
-        "ODOO_PASSWORD",
-        "mcp/odoo"
-      ],
+      "command": "uvx",
+      "args": ["biszx-odoo-mcp"],
       "env": {
         "ODOO_URL": "https://your-odoo-instance.com",
         "ODOO_DB": "your-database-name",
@@ -143,50 +138,21 @@ Add this to your `claude_desktop_config.json`:
 ### Python Package
 
 ```bash
-pip install odoo-mcp
+pip install biszx-odoo-mcp
 ```
 
 ### Running the Server
 
 ```bash
 # Using the installed package
-odoo-mcp
+biszx-odoo-mcp
+
+# Using uv for development
+uv run biszx-odoo-mcp
 
 # Using the MCP development tools
-mcp dev odoo_mcp/server.py
-
-# With additional dependencies
-mcp dev odoo_mcp/server.py --with pandas --with numpy
-
-# Mount local code for development
-mcp dev odoo_mcp/server.py --with-editable .
+uv run mcp dev src/biszx_odoo_mcp/main.py
 ```
-
-## Build
-
-Docker build:
-
-```bash
-docker build -t mcp/odoo:latest -f Dockerfile .
-```
-
-## Parameter Formatting Guidelines
-
-When using the MCP tools for Odoo, pay attention to these parameter formatting guidelines:
-
-1. **Domain Parameter**:
-   * The following domain formats are supported:
-     * List format: `[["field", "operator", value], ...]`
-     * Object format: `{"conditions": [{"field": "...", "operator": "...", "value": "..."}]}`
-     * JSON string of either format
-   * Examples:
-     * List format: `[["is_company", "=", true]]`
-     * Object format: `{"conditions": [{"field": "date_order", "operator": ">=", "value": "2025-03-01"}]}`
-     * Multiple conditions: `[["date_order", ">=", "2025-03-01"], ["date_order", "<=", "2025-03-31"]]`
-
-2. **Fields Parameter**:
-   * Should be an array of field names: `["name", "email", "phone"]`
-   * The server will try to parse string inputs as JSON
 
 ## License
 

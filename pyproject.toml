@@ -1,10 +1,6 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "odoo-mcp"
-version = "0.0.3"
+name = "biszx-odoo-mcp"
+version = "1.1.0"
 description = "MCP Server for Odoo Integration"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,46 +13,39 @@ classifiers = [
 ]
 keywords = ["odoo", "mcp", "server"]
 authors = [
-    {name = "Lê Anh Tuấn", email = "justin.le.1105@gmail.com"}
+    {name = "Biszx", email = "isares.br@gmail.com"}
 ]
 dependencies = [
-    "mcp>=0.1.1",
-    "requests>=2.31.0",
-    "pypi-xmlrpc==2020.12.3",
+    "asyncio>=3.4.3",
+    "loguru>=0.7.3",
+    "mcp[cli]>=1.9.4",
+    "odoorpc>=0.10.1",
 ]
 
 [project.urls]
-Homepage = "https://github.com/tuanle96/mcp-odoo"
-Issues = "https://github.com/tuanle96/mcp-odoo/issues"
-
-[project.optional-dependencies]
-dev = [
-    "black",
-    "isort",
-    "mypy",
-    "ruff",
-    "build",
-    "twine",
-]
+Homepage = "https://gitlab.com/biszx/biszx-odoo-mcp"
+Issues = "https://gitlab.com/biszx/biszx-odoo-mcp/issues"
 
 [project.scripts]
-odoo-mcp = "odoo_mcp.__main__:main"
+biszx-odoo-mcp = "biszx_odoo_mcp.__main__:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-packages = ["odoo_mcp"]
+packages = ["biszx_odoo_mcp"]
 
-[tool.black]
-line-length = 88
-target-version = ["py310"]
+[dependency-groups]
+dev = [
+    "flake8>=7.3.0",
+    "mypy>=1.16.1",
+    "pre-commit>=4.2.0",
+    "pylint>=3.3.7",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-asyncio>=1.0.0",
+    "python-dotenv>=1.1.1",
+    "ruff>=0.12.0",
+]
 
-[tool.isort]
-profile = "black"
-line_length = 88
-
-[tool.mypy]
-python_version = "3.10"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

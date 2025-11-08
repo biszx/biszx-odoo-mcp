@@ -35,7 +35,7 @@ TABLE OF CONTENTS:
 """
 
 import urllib.parse
-from typing import Any, Optional, Protocol, cast
+from typing import Any, Protocol, cast
 
 import odoorpc  # type: ignore
 from loguru import logger
@@ -64,7 +64,7 @@ class OdooModelProtocol(Protocol):
         ...
 
     def search_read(
-        self, domain: list[Any], fields: Optional[list[str]] = None, **kwargs: Any
+        self, domain: list[Any], fields: list[str] | None = None, **kwargs: Any
     ) -> list[dict[str, Any]]:
         """Search and read records"""
         ...
@@ -108,8 +108,8 @@ class OdooClient:
         self.config = config
         parsed_url = urllib.parse.urlparse(self.config.url)
         self.hostname = parsed_url.netloc
-        self.odoo: Optional[odoorpc.ODOO] = None  # Will be initialized in _connect
-        self.uid: Optional[int] = None  # Will be set after login
+        self.odoo: odoorpc.ODOO | None = None  # Will be initialized in _connect
+        self.uid: int | None = None  # Will be set after login
         self._connect()
 
     def _ensure_connected(self) -> Any:
@@ -198,7 +198,27 @@ class OdooClient:
         try:
             IrModel = self._get_model("ir.model")
             IrModel.check_access_rights("read")
-            domain = ["|", ("model", "like", query), ("name", "like", query)]
+            domain = [
+                "&",
+                ("transient", "=", False),
+                "&",
+                "|",
+                ("model", "like", query),
+                ("name", "like", query),
+                "|",
+                "&",
+                ("model", "not like", "base.%"),
+                ("model", "not like", "ir.%"),
+                (
+                    "model",
+                    "in",
+                    [
+                        "ir.attachment",
+                        "ir.model",
+                        "ir.model.fields",
+                    ],
+                ),
+            ]
             matching_models = IrModel.search_read(domain, ["model", "name"])
             return {
                 "query": query,
@@ -302,9 +322,9 @@ class OdooClient:
         self,
         model_name: str,
         domain: list[Any],
-        offset: Optional[int] = None,
-        limit: Optional[int] = None,
-        order: Optional[str] = None,
+        offset: int | None = None,
+        limit: int | None = None,
+        order: str | None = None,
     ) -> list[int]:
         """
         Search for record IDs that match a domain
@@ -370,10 +390,10 @@ class OdooClient:
         self,
         model_name: str,
         domain: list[Any],
-        fields: Optional[list[str]] = None,
-        offset: Optional[int] = None,
-        limit: Optional[int] = None,
-        order: Optional[str] = None,
+        fields: list[str] | None = None,
+        offset: int | None = None,
+        limit: int | None = None,
+        order: str | None = None,
     ) -> list[dict[str, Any]]:
         """
         Search for records and read their data in a single call
@@ -420,7 +440,7 @@ class OdooClient:
         self,
         model_name: str,
         ids: list[int],
-        fields: Optional[list[str]] = None,
+        fields: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Read data of records by IDs

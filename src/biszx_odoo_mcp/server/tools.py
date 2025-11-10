@@ -14,10 +14,8 @@ from biszx_odoo_mcp.server.response import Response
 async def search_models(mcp: Any, query: str) -> dict[str, Any]:
     """
     Get a list of all available models in the Odoo system.
-
     Args:
         query: Search term to find models (searches in model name and display name)
-
     Returns:
         JSON string with matching models
     """
@@ -42,10 +40,8 @@ async def search_models(mcp: Any, query: str) -> dict[str, Any]:
 async def get_model_info(mcp: Any, model_name: str) -> dict[str, Any]:
     """
     Get information about a specific Odoo model.
-
     Args:
         model_name: Name of the model (e.g., 'res.partner')
-
     Returns:
         Dictionary with model information
     """
@@ -73,11 +69,9 @@ async def get_model_fields(
 ) -> dict[str, Any]:
     """
     Get field definitions for a specific Odoo model.
-
     Args:
         model_name: Name of the model (e.g., 'res.partner')
         query_field: Search term to find fields (searches in field name and string)
-
     Returns:
         Dictionary with field definitions
     """
@@ -111,15 +105,13 @@ async def search_records(
 ) -> dict[str, Any]:
     """
     Search for records in an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
-        domain: Search domain as list of tuples (e.g., [['is_company', '=', true]])
-        fields: List of field names to return (None for all fields)
-        limit: Maximum number of records to return
-        offset: Number of records to skip
-        order: Sorting criteria (e.g., 'name ASC, id DESC')
-
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', true]]
+        fields: List of field names to return, None for all fields (default: None)
+        limit: Maximum number of records to return (default: None)
+        offset: Number of records to skip (default: None)
+        order: Sorting criteria e.g., 'name ASC, id DESC' (default: None)
     Returns:
         Dictionary with search results
     """
@@ -144,12 +136,10 @@ async def read_records(
 ) -> dict[str, Any]:
     """
     Read specific records by their IDs.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         ids: List of record IDs to read
-        fields: List of field names to return (None for all fields)
-
+        fields: List of field names to return, None for all fields (default: None)
     Returns:
         Dictionary with record data
     """
@@ -171,11 +161,9 @@ async def create_record(
 ) -> dict[str, Any]:
     """
     Create a new record in an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         values: Dictionary with field values for the new record
-
     Returns:
         Dictionary with the created record ID
     """
@@ -197,11 +185,9 @@ async def create_records(
 ) -> dict[str, Any]:
     """
     Create multiple records in an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         values_list: List of dictionaries with field values for the new records
-
     Returns:
         Dictionary with the created record IDs
     """
@@ -224,12 +210,10 @@ async def write_record(
 ) -> dict[str, Any]:
     """
     Update a single record in an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         record_id: ID of the record to update
         values: Dictionary with field values to update
-
     Returns:
         Dictionary with operation result
     """
@@ -252,12 +236,10 @@ async def write_records(
 ) -> dict[str, Any]:
     """
     Update multiple records in an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         record_ids: List of record IDs to update
         values: Dictionary with field values to update
-
     Returns:
         Dictionary with operation result
     """
@@ -279,11 +261,9 @@ async def unlink_record(
 ) -> dict[str, Any]:
     """
     Delete a single record from an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         record_id: ID of the record to delete
-
     Returns:
         Dictionary with operation result
     """
@@ -305,11 +285,9 @@ async def unlink_records(
 ) -> dict[str, Any]:
     """
     Delete multiple records from an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         record_ids: List of record IDs to delete
-
     Returns:
         Dictionary with operation result
     """
@@ -331,11 +309,9 @@ async def search_count(
 ) -> dict[str, Any]:
     """
     Count records that match a search domain.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
-        domain: Search domain as list of tuples (e.g., [['is_company', '=', True]])
-
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
     Returns:
         Dictionary with the count of matching records
     """
@@ -360,14 +336,12 @@ async def search_ids(
 ) -> dict[str, Any]:
     """
     Search for record IDs that match a domain.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
-        domain: Search domain as list of tuples (e.g., [['is_company', '=', True]])
-        offset: Number of records to skip
-        limit: Maximum number of records to return
-        order: Sorting criteria (e.g., 'name ASC, id DESC')
-
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
+        offset: Number of records to skip (default: None)
+        limit: Maximum number of records to return (default: None)
+        order: Sorting criteria e.g., 'name ASC, id DESC' (default: None)
     Returns:
         Dictionary with list of matching record IDs
     """
@@ -393,13 +367,11 @@ async def call_method(
 ) -> dict[str, Any]:
     """
     Call a custom method on an Odoo model.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         method_name: Name of the method to call
-        args: Positional arguments to pass to the method
-        kwargs: Keyword arguments to pass to the method
-
+        args: Positional arguments to pass to the method (default: None)
+        kwargs: Keyword arguments to pass to the method (default: None)
     Returns:
         Dictionary with method result
     """
@@ -419,9 +391,6 @@ async def call_method(
         return Response(error=e.to_dict()).to_dict()
 
 
-# Additional utility tools for better Odoo integration
-
-
 async def search_and_update(
     mcp: Any,
     model_name: str,
@@ -430,12 +399,10 @@ async def search_and_update(
 ) -> dict[str, Any]:
     """
     Search for records and update them in one operation.
-
     Args:
-        model_name: Name of the model (e.g., 'res.partner')
+        model_name: Name of the model e.g., 'res.partner'
         domain: Search domain to find records to update
         values: Dictionary with field values to update
-
     Returns:
         Dictionary with operation results including affected record count
     """

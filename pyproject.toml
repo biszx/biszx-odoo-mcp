@@ -1,6 +1,6 @@
 [project]
 name = "biszx-odoo-mcp"
-version = "1.1.0"
+version = "1.1.1"
 description = "MCP Server for Odoo Integration"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,10 +28,6 @@ Issues = "https://gitlab.com/biszx/biszx-odoo-mcp/issues"
 
 [project.scripts]
 biszx-odoo-mcp = "biszx_odoo_mcp.__main__:main"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-packages = ["biszx_odoo_mcp"]
 
 [dependency-groups]
 dev = [

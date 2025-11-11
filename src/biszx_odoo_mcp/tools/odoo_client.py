@@ -85,6 +85,10 @@ class OdooModelProtocol(Protocol):
         """Check access rights for the given operation"""
         ...
 
+    def read_group(self, domain: list[Any], **kwargs: Any) -> list[dict[str, Any]]:
+        """Group records and perform aggregations"""
+        ...
+
 
 class OdooClient:
     """
@@ -470,6 +474,67 @@ class OdooClient:
             return cast(list[dict[str, Any]], result)
         except RPCError as e:
             raise OdooRPCError(e, method="read_records") from e
+
+    def read_group(
+        self,
+        model_name: str,
+        domain: list[Any],
+        fields: list[str],
+        groupby: list[str],
+        offset: int | None = None,
+        limit: int | None = None,
+        order: str | None = None,
+        lazy: bool | None = None,
+    ) -> list[dict[str, Any]]:
+        """
+        Group records and perform aggregations on an Odoo model
+
+        Args:
+            model_name: Name of the model (e.g., 'res.partner')
+            domain: Search domain (e.g., [('is_company', '=', True)])
+            fields: List of field names to include, can include aggregation functions
+            groupby: List of field names to group by
+            offset: Number of groups to skip
+            limit: Maximum number of groups to return
+            order: Sorting criteria for groups (e.g., 'field_name ASC')
+            lazy: Whether to use lazy loading for grouped fields
+
+        Returns:
+            List of dictionaries with grouped and aggregated data
+
+        Examples:
+            >>> client = OdooClient(url, db, username, password)
+            >>> groups = client.read_group(
+            ...     'res.partner',
+            ...     [('is_company', '=', True)],
+            ...     ['name', 'partner_count:count(id)'],
+            ...     ['country_id'],
+            ...     limit=5
+            ... )
+            >>> print(len(groups))
+            5
+        """
+        try:
+            Model = self._get_model(model_name)
+
+            # Build read_group arguments
+            read_group_kwargs: dict[str, Any] = {
+                "fields": fields,
+                "groupby": groupby,
+            }
+            if offset is not None:
+                read_group_kwargs["offset"] = offset
+            if limit is not None:
+                read_group_kwargs["limit"] = limit
+            if order is not None:
+                read_group_kwargs["orderby"] = order
+            if lazy is not None:
+                read_group_kwargs["lazy"] = lazy
+
+            result = Model.read_group(domain, **read_group_kwargs)
+            return cast(list[dict[str, Any]], result)
+        except RPCError as e:
+            raise OdooRPCError(e, method="read_group") from e
 
     # ============================================================================
     # CRUD OPERATIONS

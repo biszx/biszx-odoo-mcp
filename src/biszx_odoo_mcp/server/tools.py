@@ -386,3 +386,46 @@ async def call_method(
         return Response(data=result).to_dict()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_dict()
+
+
+async def read_group(
+    mcp: Any,
+    model_name: str,
+    domain: list[Any],
+    fields: list[str],
+    groupby: list[str],
+    offset: int | None = None,
+    limit: int | None = None,
+    order: str | None = None,
+) -> dict[str, Any]:
+    """
+    Group records and perform aggregations on an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
+        fields: List of field names to include in results, can include
+            aggregation functions e.g., ['name', 'total_amount:sum']
+        groupby: List of field names to group by e.g., ['name']
+        offset: Number of groups to skip (default: null)
+        limit: Maximum number of groups to return (default: null)
+        order: Sorting criteria for groups e.g., 'field_name ASC' (default: null)
+    Returns:
+        Dictionary with grouped and aggregated data
+    """
+    # Access lifespan context to get the Odoo client
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    try:
+        data = app_context.odoo.read_group(
+            model_name,
+            domain,
+            fields=fields,
+            groupby=groupby,
+            offset=offset,
+            limit=limit,
+            order=order,
+        )
+        return Response(data=data).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()

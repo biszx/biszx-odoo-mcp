@@ -108,10 +108,10 @@ async def search_records(
     Args:
         model_name: Name of the model e.g., 'res.partner'
         domain: Search domain as list of tuples e.g., [['is_company', '=', true]]
-        fields: List of field names to return, None for all fields (default: None)
-        limit: Maximum number of records to return (default: None)
-        offset: Number of records to skip (default: None)
-        order: Sorting criteria e.g., 'name ASC, id DESC' (default: None)
+        fields: List of field names to return, None for all fields (default: null)
+        limit: Maximum number of records to return (default: null)
+        offset: Number of records to skip (default: null)
+        order: Sorting criteria e.g., 'name ASC, id DESC' (default: null)
     Returns:
         Dictionary with search results
     """
@@ -124,180 +124,6 @@ async def search_records(
             model_name, domain, fields=fields, limit=limit, offset=offset, order=order
         )
         return Response(data=data).to_dict()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_dict()
-
-
-async def read_records(
-    mcp: Any,
-    model_name: str,
-    ids: list[int],
-    fields: list[str] | None = None,
-) -> dict[str, Any]:
-    """
-    Read specific records by their IDs.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        ids: List of record IDs to read
-        fields: List of field names to return, None for all fields (default: None)
-    Returns:
-        Dictionary with record data
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        data = app_context.odoo.read_records(model_name, ids, fields=fields)
-        return Response(data=data).to_dict()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_dict()
-
-
-async def create_record(
-    mcp: Any,
-    model_name: str,
-    values: dict[str, Any],
-) -> dict[str, Any]:
-    """
-    Create a new record in an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        values: Dictionary with field values for the new record
-    Returns:
-        Dictionary with the created record ID
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        record_id = app_context.odoo.create_records(model_name, [values])
-        return Response(data={"id": record_id}).to_dict()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_dict()
-
-
-async def create_records(
-    mcp: Any,
-    model_name: str,
-    values_list: list[dict[str, Any]],
-) -> dict[str, Any]:
-    """
-    Create multiple records in an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        values_list: List of dictionaries with field values for the new records
-    Returns:
-        Dictionary with the created record IDs
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        record_ids = app_context.odoo.create_records(model_name, values_list)
-        return Response(data={"ids": record_ids}).to_dict()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_dict()
-
-
-async def write_record(
-    mcp: Any,
-    model_name: str,
-    record_id: int,
-    values: dict[str, Any],
-) -> dict[str, Any]:
-    """
-    Update a single record in an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        record_id: ID of the record to update
-        values: Dictionary with field values to update
-    Returns:
-        Dictionary with operation result
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        result = app_context.odoo.write_records(model_name, [record_id], values)
-        return Response(data={"success": result}).to_dict()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_dict()
-
-
-async def write_records(
-    mcp: Any,
-    model_name: str,
-    record_ids: list[int],
-    values: dict[str, Any],
-) -> dict[str, Any]:
-    """
-    Update multiple records in an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        record_ids: List of record IDs to update
-        values: Dictionary with field values to update
-    Returns:
-        Dictionary with operation result
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        result = app_context.odoo.write_records(model_name, record_ids, values)
-        return Response(data={"success": result}).to_dict()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_dict()
-
-
-async def unlink_record(
-    mcp: Any,
-    model_name: str,
-    record_id: int,
-) -> dict[str, Any]:
-    """
-    Delete a single record from an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        record_id: ID of the record to delete
-    Returns:
-        Dictionary with operation result
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        result = app_context.odoo.unlink_records(model_name, [record_id])
-        return Response(data={"success": result}).to_dict()
-    except OdooMCPError as e:
-        return Response(error=e.to_dict()).to_dict()
-
-
-async def unlink_records(
-    mcp: Any,
-    model_name: str,
-    record_ids: list[int],
-) -> dict[str, Any]:
-    """
-    Delete multiple records from an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        record_ids: List of record IDs to delete
-    Returns:
-        Dictionary with operation result
-    """
-    # Access lifespan context to get the Odoo client
-    ctx = mcp.get_context()
-    app_context = cast(AppContext, ctx.request_context.lifespan_context)
-
-    try:
-        result = app_context.odoo.unlink_records(model_name, record_ids)
-        return Response(data={"success": result}).to_dict()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_dict()
 
@@ -339,9 +165,9 @@ async def search_ids(
     Args:
         model_name: Name of the model e.g., 'res.partner'
         domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
-        offset: Number of records to skip (default: None)
-        limit: Maximum number of records to return (default: None)
-        order: Sorting criteria e.g., 'name ASC, id DESC' (default: None)
+        offset: Number of records to skip (default: null)
+        limit: Maximum number of records to return (default: null)
+        order: Sorting criteria e.g., 'name ASC, id DESC' (default: null)
     Returns:
         Dictionary with list of matching record IDs
     """
@@ -358,40 +184,83 @@ async def search_ids(
         return Response(error=e.to_dict()).to_dict()
 
 
-async def call_method(
+async def read_records(
     mcp: Any,
     model_name: str,
-    method_name: str,
-    args: list[Any] | None = None,
-    kwargs: dict[str, Any] | None = None,
+    ids: list[int],
+    fields: list[str] | None = None,
 ) -> dict[str, Any]:
     """
-    Call a custom method on an Odoo model.
+    Read specific records by their IDs.
     Args:
         model_name: Name of the model e.g., 'res.partner'
-        method_name: Name of the method to call
-        args: Positional arguments to pass to the method (default: None)
-        kwargs: Keyword arguments to pass to the method (default: None)
+        ids: List of record IDs to read
+        fields: List of field names to return, None for all fields (default: null)
     Returns:
-        Dictionary with method result
+        Dictionary with record data
     """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
-    if args is None:
-        args = []
-    if kwargs is None:
-        kwargs = {}
-
     try:
-        result = app_context.odoo.call_method(model_name, method_name, args, kwargs)
-        return Response(data=result).to_dict()
+        data = app_context.odoo.read_records(model_name, ids, fields=fields)
+        return Response(data=data).to_dict()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_dict()
 
 
-async def search_and_update(
+async def create_records(
+    mcp: Any,
+    model_name: str,
+    values_list: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """
+    Create multiple records in an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        values_list: List of dictionaries with field values for the new records
+    Returns:
+        Dictionary with the created record IDs
+    """
+    # Access lifespan context to get the Odoo client
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    try:
+        record_ids = app_context.odoo.create_records(model_name, values_list)
+        return Response(data={"ids": record_ids}).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
+
+
+async def write_records(
+    mcp: Any,
+    model_name: str,
+    record_ids: list[int],
+    values: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Update multiple records in an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        record_ids: List of record IDs to update
+        values: Dictionary with field values to update
+    Returns:
+        Dictionary with operation result
+    """
+    # Access lifespan context to get the Odoo client
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    try:
+        result = app_context.odoo.write_records(model_name, record_ids, values)
+        return Response(data={"success": result}).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
+
+
+async def search_and_write(
     mcp: Any,
     model_name: str,
     domain: list[Any],
@@ -419,14 +288,144 @@ async def search_and_update(
             ).to_dict()
 
         # Then update the found records
-        result = app_context.odoo.write_records(model_name, record_ids, values)
+        app_context.odoo.write_records(model_name, record_ids, values)
         return Response(
             data={
                 "affected_records": len(record_ids),
                 "record_ids": record_ids,
-                "updated": result,
-                "update_result": result,  # For backward compatibility
             }
         ).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
+
+
+async def unlink_records(
+    mcp: Any,
+    model_name: str,
+    record_ids: list[int],
+) -> dict[str, Any]:
+    """
+    Delete multiple records from an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        record_ids: List of record IDs to delete
+    Returns:
+        Dictionary with operation result
+    """
+    # Access lifespan context to get the Odoo client
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    try:
+        app_context.odoo.unlink_records(model_name, record_ids)
+        return Response().to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
+
+
+async def search_and_unlink(
+    mcp: Any,
+    model_name: str,
+    domain: list[Any],
+) -> dict[str, Any]:
+    """
+    Search for records and delete them in one operation.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain to find records to delete
+    Returns:
+        Dictionary with operation results including affected record count
+    """
+    # Access lifespan context to get the Odoo client
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    try:
+        # First search for IDs
+        record_ids = app_context.odoo.search_ids(model_name, domain)
+        if not record_ids:
+            return Response(error={"error": "No records found"}).to_dict()
+
+        # Then delete the found records
+        app_context.odoo.unlink_records(model_name, record_ids)
+        return Response(
+            data={"affected_records": len(record_ids), "record_ids": record_ids}
+        ).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
+
+
+async def call_method(
+    mcp: Any,
+    model_name: str,
+    method_name: str,
+    args: list[Any] | None = None,
+    kwargs: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """
+    Call a custom method on an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        method_name: Name of the method to call
+        args: Positional arguments to pass to the method (default: null)
+        kwargs: Keyword arguments to pass to the method (default: null)
+    Returns:
+        Dictionary with method result
+    """
+    # Access lifespan context to get the Odoo client
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    if args is None:
+        args = []
+    if kwargs is None:
+        kwargs = {}
+
+    try:
+        result = app_context.odoo.call_method(model_name, method_name, args, kwargs)
+        return Response(data=result).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
+
+
+async def read_group(
+    mcp: Any,
+    model_name: str,
+    domain: list[Any],
+    fields: list[str],
+    groupby: list[str],
+    offset: int | None = None,
+    limit: int | None = None,
+    order: str | None = None,
+) -> dict[str, Any]:
+    """
+    Group records and perform aggregations on an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
+        fields: List of field names to include in results, can include
+            aggregation functions e.g., ['name', 'total_amount:sum']
+        groupby: List of field names to group by e.g., ['name']
+        offset: Number of groups to skip (default: null)
+        limit: Maximum number of groups to return (default: null)
+        order: Sorting criteria for groups e.g., 'field_name ASC' (default: null)
+    Returns:
+        Dictionary with grouped and aggregated data
+    """
+    # Access lifespan context to get the Odoo client
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    try:
+        data = app_context.odoo.read_group(
+            model_name,
+            domain,
+            fields=fields,
+            groupby=groupby,
+            offset=offset,
+            limit=limit,
+            order=order,
+        )
+        return Response(data=data).to_dict()
     except OdooMCPError as e:
         return Response(error=e.to_dict()).to_dict()

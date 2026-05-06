@@ -192,6 +192,7 @@ def mock_odoo_client_tools():
     mock_client.unlink_records = Mock()
     mock_client.search_ids = Mock()
     mock_client.search_count = Mock()
+    mock_client.get_current_user = Mock()
     mock_client.call_method = Mock()
     mock_client.execute_method = Mock()
 

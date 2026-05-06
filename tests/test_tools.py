@@ -163,6 +163,46 @@ class TestGetModelFields:
         assert "Unexpected error getting model fields" in result["error"]["message"]
 
 
+class TestGetCurrentUser:
+    """Test cases for get_current_user tool"""
+
+    @pytest.mark.asyncio
+    async def test_get_current_user_success(self, mock_mcp_server_for_tools):
+        """Test successful current user retrieval"""
+        mock_odoo = get_mock_odoo(mock_mcp_server_for_tools)
+        user_data = {"id": 42, "name": "Admin", "login": "admin"}
+        mock_odoo.get_current_user.return_value = user_data
+
+        result = await tools.get_current_user(mock_mcp_server_for_tools)
+
+        assert result["success"] is True
+        assert result["data"] == user_data
+
+    @pytest.mark.asyncio
+    async def test_get_current_user_error(self, mock_mcp_server_for_tools):
+        """Test current user retrieval with error"""
+        mock_odoo = get_mock_odoo(mock_mcp_server_for_tools)
+        error = OdooMCPError("Current user error")
+        mock_odoo.get_current_user.side_effect = error
+
+        result = await tools.get_current_user(mock_mcp_server_for_tools)
+
+        assert result["success"] is False
+        assert "error" in result
+
+    @pytest.mark.asyncio
+    async def test_get_current_user_unexpected_error(self, mock_mcp_server_for_tools):
+        """Test current user retrieval with unexpected error"""
+        mock_odoo = get_mock_odoo(mock_mcp_server_for_tools)
+        mock_odoo.get_current_user.side_effect = RuntimeError("Unexpected error")
+
+        result = await tools.get_current_user(mock_mcp_server_for_tools)
+
+        assert result["success"] is False
+        assert "error" in result
+        assert "Unexpected error getting current user" in result["error"]["message"]
+
+
 class TestSearchRecords:
     """Test cases for search_records tool"""
 

@@ -38,10 +38,8 @@ def main() -> int:
         if e.details:
             logger.debug(f"Additional details: {e.details}")
         return 1
-    except Exception as e:
-        logger.error(f"Critical server error: {e}")
-        logger.debug(f"Exception type: {type(e)}")
-        logger.debug("Traceback:", exc_info=True)
+    except Exception:
+        logger.exception("Traceback:", exc_info=True)
         return 1
 
 

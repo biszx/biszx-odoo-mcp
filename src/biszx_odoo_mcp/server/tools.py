@@ -94,6 +94,33 @@ async def get_model_fields(
         return Response(error=tool_error.to_dict()).to_dict()
 
 
+async def get_current_user(mcp: Any, fields: list[str] | None = None) -> dict[str, Any]:
+    """
+    Get information about the currently authenticated Odoo user.
+
+    Args:
+        fields: Optional list of user fields to return.
+
+    Returns:
+        Dictionary with the current user information.
+    """
+    ctx = mcp.get_context()
+    app_context = cast(AppContext, ctx.request_context.lifespan_context)
+
+    try:
+        data = app_context.odoo.get_current_user(fields=fields)
+        return Response(data=data).to_dict()
+    except OdooMCPError as e:
+        return Response(error=e.to_dict()).to_dict()
+    except Exception as e:
+        tool_error = ToolError(
+            f"Unexpected error getting current user: {str(e)}",
+            tool_name="get_current_user",
+            original_error=e,
+        )
+        return Response(error=tool_error.to_dict()).to_dict()
+
+
 async def search_records(
     mcp: Any,
     model_name: str,

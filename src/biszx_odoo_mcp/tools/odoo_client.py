@@ -114,6 +114,7 @@ class OdooClient:
         self.hostname = parsed_url.netloc
         self.odoo: odoorpc.ODOO | None = None  # Will be initialized in _connect
         self.uid: int | None = None  # Will be set after login
+        self.user: dict[str, Any] | None = None  # Will be set after login
         self._connect()
 
     def _ensure_connected(self) -> Any:
@@ -149,8 +150,23 @@ class OdooClient:
 
             # Get user ID for later use
             user_model = self._get_model("res.users")
-            user_records = user_model.search([("login", "=", self.config.username)])
-            self.uid = user_records[0] if user_records else None
+            user_records = user_model.search_read(
+                [("login", "=", self.config.username)],
+                [
+                    "id",
+                    "name",
+                    "login",
+                    "email",
+                    "lang",
+                    "tz",
+                    "company_id",
+                    "partner_id",
+                    "employee_ids",
+                ],
+            )
+            if user_records:
+                self.uid = user_records[0]["id"]
+                self.user = user_records[0]
 
             logger.info("✅ Successfully connected to Odoo")
 
@@ -317,6 +333,30 @@ class OdooClient:
             return result
         except RPCError as e:
             raise OdooRPCError(e, method="get_model_fields") from e
+
+    def get_current_user(self, fields: list[str] | None = None) -> dict[str, Any]:
+        """
+        Get information about the currently authenticated Odoo user.
+
+        Args:
+            fields: Optional list of user fields to return. If None, a default
+                set of common user fields is returned.
+
+        Returns:
+            Dictionary with the current user information.
+        """
+        if self.uid is None:
+            raise ValueError("Current user information is not available")
+        if not fields and self.user:
+            return self.user
+
+        try:
+            User = self._get_model("res.users")
+            records = User.browse([self.uid]).read(fields)
+            self.user = records[0] if records else None
+            return cast(dict[str, Any], self.user or {})
+        except RPCError as e:
+            raise OdooRPCError(e, method="get_current_user") from e
 
     # ============================================================================
     # SEARCH AND READ OPERATIONS
@@ -532,7 +572,7 @@ class OdooClient:
                 read_group_kwargs["lazy"] = lazy
 
             result = Model.read_group(domain, **read_group_kwargs)
-            return cast(list[dict[str, Any]], result)
+            return result
         except RPCError as e:
             raise OdooRPCError(e, method="read_group") from e
 

@@ -12,13 +12,7 @@ from biszx_odoo_mcp.server.response import Response
 
 
 async def search_models(mcp: Any, query: str) -> dict[str, Any]:
-    """
-    Get a list of all available models in the Odoo system.
-    Args:
-        query: Search term to find models (searches in model name and display name)
-    Returns:
-        JSON string with matching models
-    """
+    """Get a list of all available models in the Odoo system."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -38,13 +32,7 @@ async def search_models(mcp: Any, query: str) -> dict[str, Any]:
 
 
 async def get_model_info(mcp: Any, model_name: str) -> dict[str, Any]:
-    """
-    Get information about a specific Odoo model.
-    Args:
-        model_name: Name of the model (e.g., 'res.partner')
-    Returns:
-        Dictionary with model information
-    """
+    """Get information about a specific Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -67,14 +55,7 @@ async def get_model_info(mcp: Any, model_name: str) -> dict[str, Any]:
 async def get_model_fields(
     mcp: Any, model_name: str, query_field: str
 ) -> dict[str, Any]:
-    """
-    Get field definitions for a specific Odoo model.
-    Args:
-        model_name: Name of the model (e.g., 'res.partner')
-        query_field: Search term to find fields (searches in field name and string)
-    Returns:
-        Dictionary with field definitions
-    """
+    """Get field definitions for a specific Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -95,15 +76,7 @@ async def get_model_fields(
 
 
 async def get_current_user(mcp: Any, fields: list[str] | None = None) -> dict[str, Any]:
-    """
-    Get information about the currently authenticated Odoo user.
-
-    Args:
-        fields: Optional list of user fields to return.
-
-    Returns:
-        Dictionary with the current user information.
-    """
+    """Get information about the currently authenticated Odoo user."""
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
@@ -130,18 +103,7 @@ async def search_records(
     offset: int | None = None,
     order: str | None = None,
 ) -> dict[str, Any]:
-    """
-    Search for records in an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        domain: Search domain as list of tuples e.g., [['is_company', '=', true]]
-        fields: List of field names to return, None for all fields (default: null)
-        limit: Maximum number of records to return (default: null)
-        offset: Number of records to skip (default: null)
-        order: Sorting criteria e.g., 'name ASC, id DESC' (default: null)
-    Returns:
-        Dictionary with search results
-    """
+    """Search for records in an Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -160,14 +122,7 @@ async def search_count(
     model_name: str,
     domain: list[Any],
 ) -> dict[str, Any]:
-    """
-    Count records that match a search domain.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
-    Returns:
-        Dictionary with the count of matching records
-    """
+    """Count records that match a search domain."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -187,17 +142,7 @@ async def search_ids(
     limit: int | None = None,
     order: str | None = None,
 ) -> dict[str, Any]:
-    """
-    Search for record IDs that match a domain.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
-        offset: Number of records to skip (default: null)
-        limit: Maximum number of records to return (default: null)
-        order: Sorting criteria e.g., 'name ASC, id DESC' (default: null)
-    Returns:
-        Dictionary with list of matching record IDs
-    """
+    """Search for record IDs that match a domain."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -217,15 +162,7 @@ async def read_records(
     ids: list[int],
     fields: list[str] | None = None,
 ) -> dict[str, Any]:
-    """
-    Read specific records by their IDs.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        ids: List of record IDs to read
-        fields: List of field names to return, None for all fields (default: null)
-    Returns:
-        Dictionary with record data
-    """
+    """Read specific records by their IDs."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -242,14 +179,7 @@ async def create_records(
     model_name: str,
     values_list: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    """
-    Create multiple records in an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        values_list: List of dictionaries with field values for the new records
-    Returns:
-        Dictionary with the created record IDs
-    """
+    """Create multiple records in an Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -267,15 +197,7 @@ async def write_records(
     record_ids: list[int],
     values: dict[str, Any],
 ) -> dict[str, Any]:
-    """
-    Update multiple records in an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        record_ids: List of record IDs to update
-        values: Dictionary with field values to update
-    Returns:
-        Dictionary with operation result
-    """
+    """Update multiple records in an Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -293,15 +215,7 @@ async def search_and_write(
     domain: list[Any],
     values: dict[str, Any],
 ) -> dict[str, Any]:
-    """
-    Search for records and update them in one operation.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        domain: Search domain to find records to update
-        values: Dictionary with field values to update
-    Returns:
-        Dictionary with operation results including affected record count
-    """
+    """Search for records and update them in one operation."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -331,14 +245,7 @@ async def unlink_records(
     model_name: str,
     record_ids: list[int],
 ) -> dict[str, Any]:
-    """
-    Delete multiple records from an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        record_ids: List of record IDs to delete
-    Returns:
-        Dictionary with operation result
-    """
+    """Delete multiple records from an Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -355,14 +262,7 @@ async def search_and_unlink(
     model_name: str,
     domain: list[Any],
 ) -> dict[str, Any]:
-    """
-    Search for records and delete them in one operation.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        domain: Search domain to find records to delete
-    Returns:
-        Dictionary with operation results including affected record count
-    """
+    """Search for records and delete them in one operation."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -389,16 +289,7 @@ async def call_method(
     args: list[Any] | None = None,
     kwargs: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """
-    Call a custom method on an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        method_name: Name of the method to call
-        args: Positional arguments to pass to the method (default: null)
-        kwargs: Keyword arguments to pass to the method (default: null)
-    Returns:
-        Dictionary with method result
-    """
+    """Call a custom method on an Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -425,20 +316,7 @@ async def read_group(
     limit: int | None = None,
     order: str | None = None,
 ) -> dict[str, Any]:
-    """
-    Group records and perform aggregations on an Odoo model.
-    Args:
-        model_name: Name of the model e.g., 'res.partner'
-        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
-        fields: List of field names to include in results, can include
-            aggregation functions e.g., ['name', 'total_amount:sum']
-        groupby: List of field names to group by e.g., ['name']
-        offset: Number of groups to skip (default: null)
-        limit: Maximum number of groups to return (default: null)
-        order: Sorting criteria for groups e.g., 'field_name ASC' (default: null)
-    Returns:
-        Dictionary with grouped and aggregated data
-    """
+    """Group records and perform aggregations on an Odoo model."""
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)

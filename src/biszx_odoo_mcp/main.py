@@ -93,18 +93,21 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
 
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         save_to = kwargs.pop("save_to", None)
-        result = await func(mcp, *args, **kwargs)
-        if save_to:
+        result: Response = await func(mcp, *args, **kwargs)
+        if save_to and result.success:
             try:
                 with open(save_to, "w", encoding="utf-8") as _f:
-                    json.dump(result, _f, default=str, indent=2, ensure_ascii=False)
+                    json.dump(
+                        result.to_dict(), _f, default=str, indent=2, ensure_ascii=False
+                    )
+                result = Response(data={"save_to": save_to})
             except Exception as e:
-                return Response(error={"save_error": str(e)}).to_dict()
+                result = Response(error={"save_error": str(e)})
 
-        return result
+        return result.to_dict()
 
     # Set wrapper properties manually to match the new signature
-    wrapper.__name__ = func.__name__
+    wrapper.__name__ = func.__name__  # ty:ignore[unresolved-attribute]
     wrapper.__doc__ = func.__doc__
     wrapper.__annotations__ = {
         k: v for k, v in func.__annotations__.items() if k != "mcp"

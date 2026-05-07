@@ -1,4 +1,4 @@
 #!/bin/bash
 
 uv build \
-    && twine upload dist/*
+    && twine upload dist/* --skip-existing

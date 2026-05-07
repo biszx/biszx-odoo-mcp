@@ -12,7 +12,14 @@ from biszx_odoo_mcp.server.response import Response
 
 
 async def search_models(mcp: Any, query: str) -> Response:
-    """Get a list of all available models in the Odoo system."""
+    """
+    Get a list of all available models in the Odoo system.
+    Args:
+        query: Search term to find models (searches in model name and display name)
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        JSON string with matching models
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -32,7 +39,14 @@ async def search_models(mcp: Any, query: str) -> Response:
 
 
 async def get_model_info(mcp: Any, model_name: str) -> Response:
-    """Get information about a specific Odoo model."""
+    """
+    Get information about a specific Odoo model.
+    Args:
+        model_name: Name of the model (e.g., 'res.partner')
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with model information
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -53,7 +67,14 @@ async def get_model_info(mcp: Any, model_name: str) -> Response:
 
 
 async def get_model_fields(mcp: Any, model_name: str, query_field: str) -> Response:
-    """Get field definitions for a specific Odoo model."""
+    """
+    Get field definitions for a specific Odoo model.
+    Args:
+        model_name: Name of the model (e.g., 'res.partner')
+        query_field: Search term to find fields (searches in field name and string)
+    Returns:
+        Dictionary with field definitions
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -74,7 +95,14 @@ async def get_model_fields(mcp: Any, model_name: str, query_field: str) -> Respo
 
 
 async def get_current_user(mcp: Any, fields: list[str] | None = None) -> Response:
-    """Get information about the currently authenticated Odoo user."""
+    """
+    Get information about the currently authenticated Odoo user.
+    Args:
+        fields: Optional list of user fields to return.
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with the current user information.
+    """
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
@@ -101,7 +129,19 @@ async def search_records(
     offset: int | None = None,
     order: str | None = None,
 ) -> Response:
-    """Search for records in an Odoo model."""
+    """
+    Search for records in an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', true]]
+        fields: List of field names to return, None for all fields (default: null)
+        limit: Maximum number of records to return (default: null)
+        offset: Number of records to skip (default: null)
+        order: Sorting criteria e.g., 'name ASC, id DESC' (default: null)
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with search results
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -120,7 +160,15 @@ async def search_count(
     model_name: str,
     domain: list[Any],
 ) -> Response:
-    """Count records that match a search domain."""
+    """
+    Count records that match a search domain.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with the count of matching records
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -140,7 +188,18 @@ async def search_ids(
     limit: int | None = None,
     order: str | None = None,
 ) -> Response:
-    """Search for record IDs that match a domain."""
+    """
+    Search for record IDs that match a domain.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
+        offset: Number of records to skip (default: null)
+        limit: Maximum number of records to return (default: null)
+        order: Sorting criteria e.g., 'name ASC, id DESC' (default: null)
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with list of matching record IDs
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -160,7 +219,16 @@ async def read_records(
     ids: list[int],
     fields: list[str] | None = None,
 ) -> Response:
-    """Read specific records by their IDs."""
+    """
+    Read specific records by their IDs.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        ids: List of record IDs to read
+        fields: List of field names to return, None for all fields (default: null)
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with record data
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -177,7 +245,15 @@ async def create_records(
     model_name: str,
     values_list: list[dict[str, Any]],
 ) -> Response:
-    """Create multiple records in an Odoo model."""
+    """
+    Create multiple records in an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        values_list: List of dictionaries with field values for the new records
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with the created record IDs
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -195,7 +271,16 @@ async def write_records(
     record_ids: list[int],
     values: dict[str, Any],
 ) -> Response:
-    """Update multiple records in an Odoo model."""
+    """
+    Update multiple records in an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        record_ids: List of record IDs to update
+        values: Dictionary with field values to update
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with operation result
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -213,7 +298,16 @@ async def search_and_write(
     domain: list[Any],
     values: dict[str, Any],
 ) -> Response:
-    """Search for records and update them in one operation."""
+    """
+    Search for records and update them in one operation.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain to find records to update
+        values: Dictionary with field values to update
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with operation results including affected record count
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -241,7 +335,15 @@ async def unlink_records(
     model_name: str,
     record_ids: list[int],
 ) -> Response:
-    """Delete multiple records from an Odoo model."""
+    """
+    Delete multiple records from an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        record_ids: List of record IDs to delete
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with operation result
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -258,7 +360,15 @@ async def search_and_unlink(
     model_name: str,
     domain: list[Any],
 ) -> Response:
-    """Search for records and delete them in one operation."""
+    """
+    Search for records and delete them in one operation.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain to find records to delete
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with operation results including affected record count
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -285,7 +395,17 @@ async def call_method(
     args: list[Any] | None = None,
     kwargs: dict[str, Any] | None = None,
 ) -> Response:
-    """Call a custom method on an Odoo model."""
+    """
+    Call a custom method on an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        method_name: Name of the method to call
+        args: Positional arguments to pass to the method (default: null)
+        kwargs: Keyword arguments to pass to the method (default: null)
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with method result
+    """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
@@ -312,7 +432,20 @@ async def read_group(
     limit: int | None = None,
     order: str | None = None,
 ) -> Response:
-    """Group records and perform aggregations on an Odoo model."""
+    """
+    Group records and perform aggregations on an Odoo model.
+    Args:
+        model_name: Name of the model e.g., 'res.partner'
+        domain: Search domain as list of tuples e.g., [['is_company', '=', True]]
+        fields: List of field names to include in results, can include aggregation functions e.g., ['name', 'total_amount:sum']
+        groupby: List of field names to group by e.g., ['name']
+        offset: Number of groups to skip (default: null)
+        limit: Maximum number of groups to return (default: null)
+        order: Sorting criteria for groups e.g., 'field_name ASC' (default: null)
+        save_to: Optional file path to save the results to a JSON file
+    Returns:
+        Dictionary with grouped and aggregated data
+    """  # noqa: E501
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)

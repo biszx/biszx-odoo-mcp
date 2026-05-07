@@ -108,7 +108,7 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
 
     # Set wrapper properties manually to match the new signature
     wrapper.__name__ = func.__name__  # ty:ignore[unresolved-attribute]
-    wrapper.__doc__ = func.__doc__
+    wrapper.__doc__ = func.__doc__.strip() if func.__doc__ else ""
     wrapper.__annotations__ = {
         k: v for k, v in func.__annotations__.items() if k != "mcp"
     }

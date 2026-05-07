@@ -5,6 +5,7 @@ Provides MCP tools and resources for interacting with Odoo ERP systems
 """
 
 import inspect
+import json
 import os
 import sys
 from collections.abc import AsyncIterator, Callable
@@ -16,6 +17,7 @@ from mcp.server.fastmcp import FastMCP
 
 from biszx_odoo_mcp.server import resources, tools
 from biszx_odoo_mcp.server.context import AppContext
+from biszx_odoo_mcp.server.response import Response
 from biszx_odoo_mcp.tools.odoo_client import get_odoo_client
 
 
@@ -66,17 +68,40 @@ mcp = FastMCP(
 
 # Tool registration helper
 def tool(func: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorator to register a tool that calls the underlying function with mcp"""
+    """
+    Decorator to register a tool that calls the underlying function with mcp.
+
+    Adds an optional keyword-only parameter `save_to` that, when provided,
+    will save the tool's returned dictionary to the given file path as JSON.
+    """
 
     # Get the original function signature
     sig = inspect.signature(func)
 
     # Create a new signature excluding the 'mcp' parameter
     new_params = [p for name, p in sig.parameters.items() if name != "mcp"]
+
+    # Add an optional keyword-only parameter `save_to: str | None = None`
+    save_param = inspect.Parameter(
+        "save_to",
+        inspect.Parameter.KEYWORD_ONLY,
+        default=None,
+        annotation=str | None,
+    )
+    new_params.append(save_param)
     new_sig = sig.replace(parameters=new_params)
 
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
-        return await func(mcp, *args, **kwargs)
+        save_to = kwargs.pop("save_to", None)
+        result = await func(mcp, *args, **kwargs)
+        if save_to:
+            try:
+                with open(save_to, "w", encoding="utf-8") as _f:
+                    json.dump(result, _f, default=str, indent=2, ensure_ascii=False)
+            except Exception as e:
+                return Response(error={"save_error": str(e)}).to_dict()
+
+        return result
 
     # Set wrapper properties manually to match the new signature
     wrapper.__name__ = func.__name__
@@ -84,6 +109,7 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
     wrapper.__annotations__ = {
         k: v for k, v in func.__annotations__.items() if k != "mcp"
     }
+    wrapper.__annotations__["save_to"] = str | None
 
     # Set the corrected signature
     object.__setattr__(wrapper, "__signature__", new_sig)

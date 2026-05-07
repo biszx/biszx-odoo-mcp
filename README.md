@@ -8,32 +8,26 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 ### Core CRUD Operations
 
 - **create_record**: Create a single new record
-
   - Inputs: `model_name` (string), `values` (object)
   - Returns: Dictionary with created record ID
 
 - **create_records**: Create multiple records at once
-
   - Inputs: `model_name` (string), `values_list` (array of objects)
   - Returns: Dictionary with created record IDs
 
 - **read_records**: Read specific records by their IDs
-
   - Inputs: `model_name` (string), `ids` (array), `fields` (optional array)
   - Returns: Dictionary with record data
 
 - **write_record**: Update a single record
-
   - Inputs: `model_name` (string), `record_id` (number), `values` (object)
   - Returns: Dictionary with operation result
 
 - **write_records**: Update multiple records
-
   - Inputs: `model_name` (string), `record_ids` (array), `values` (object)
   - Returns: Dictionary with operation result
 
 - **unlink_record**: Delete a single record
-
   - Inputs: `model_name` (string), `record_id` (number)
   - Returns: Dictionary with operation result
 
@@ -44,12 +38,10 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 ### Search and Query Operations
 
 - **search_records**: Search for records with advanced filtering
-
   - Inputs: `model_name` (string), `domain` (array), `fields` (optional array), `limit` (optional number), `offset` (optional number), `order` (optional string)
   - Returns: Dictionary with matching records
 
 - **search_ids**: Get only IDs of matching records
-
   - Inputs: `model_name` (string), `domain` (array), `offset` (optional number), `limit` (optional number), `order` (optional string)
   - Returns: Dictionary with list of IDs
 
@@ -60,12 +52,10 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 ### Model Operations
 
 - **search_models**: Search for available models in the Odoo system
-
   - Inputs: `query` (string) - Search term for model names and display names
   - Returns: Dictionary with matching models
 
 - **get_model_info**: Get information about a specific model
-
   - Inputs: `model_name` (string)
   - Returns: Dictionary with model information
 
@@ -76,12 +66,14 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 ### Utility Operations
 
 - **search_and_update**: Search and update records in one operation
-
   - Inputs: `model_name` (string), `domain` (array), `values` (object)
   - Returns: Dictionary with affected record count and IDs
 
-- **call_method**: Call custom methods on models
+- **get_current_user**: Retrieve information about the currently authenticated Odoo user
+  - Inputs: `fields` (optional array of strings)
+  - Returns: Dictionary with current user data
 
+- **call_method**: Call custom methods on models
   - Inputs: `model_name` (string), `method_name` (string), `args` (optional array), `kwargs` (optional object)
   - Returns: Dictionary with method result
 

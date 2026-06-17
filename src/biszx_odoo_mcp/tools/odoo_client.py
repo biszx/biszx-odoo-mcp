@@ -35,12 +35,14 @@ TABLE OF CONTENTS:
 """
 
 import urllib.parse
+from http.cookiejar import CookieJar
 from typing import Any, Protocol, cast
+from urllib.request import HTTPCookieProcessor, Request, build_opener
 
-import odoorpc  # type: ignore
+import odoorpc
 from loguru import logger
-from odoorpc.error import InternalError, RPCError  # type: ignore
-from odoorpc.rpc.error import ConnectorError  # type: ignore
+from odoorpc.error import InternalError, RPCError
+from odoorpc.rpc.error import ConnectorError
 
 from biszx_odoo_mcp.exceptions import (
     AuthenticationError,
@@ -50,6 +52,26 @@ from biszx_odoo_mcp.exceptions import (
     OdooRPCError,
 )
 from biszx_odoo_mcp.tools.config import Config
+
+
+class BrowserOpener:
+    def __init__(self):
+        self._opener = build_opener(HTTPCookieProcessor(CookieJar()))
+
+    def open(self, *args, **kwargs):
+        req = args[0] if args else kwargs.get("request", kwargs.get("url"))
+        if isinstance(req, str):
+            req = Request(req)
+        if not req.headers.get("User-agent"):
+            req.add_header(
+                "User-Agent",
+                (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/120.0.0.0 Safari/537.36"
+                ),
+            )
+        return self._opener.open(req, **kwargs)
 
 
 class OdooModelProtocol(Protocol):
@@ -145,6 +167,7 @@ class OdooClient:
                 port=port,
                 timeout=self.config.timeout,
                 version=None,
+                opener=BrowserOpener(),
             )
             self.odoo.login(self.config.db, self.config.username, self.config.password)
 

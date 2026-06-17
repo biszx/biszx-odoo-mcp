@@ -5,37 +5,9 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
 
 ## Tools
 
-### Core CRUD Operations
+All tools support an optional `save_to` parameter to save results to a JSON file.
 
-- **create_record**: Create a single new record
-  - Inputs: `model_name` (string), `values` (object)
-  - Returns: Dictionary with created record ID
-
-- **create_records**: Create multiple records at once
-  - Inputs: `model_name` (string), `values_list` (array of objects)
-  - Returns: Dictionary with created record IDs
-
-- **read_records**: Read specific records by their IDs
-  - Inputs: `model_name` (string), `ids` (array), `fields` (optional array)
-  - Returns: Dictionary with record data
-
-- **write_record**: Update a single record
-  - Inputs: `model_name` (string), `record_id` (number), `values` (object)
-  - Returns: Dictionary with operation result
-
-- **write_records**: Update multiple records
-  - Inputs: `model_name` (string), `record_ids` (array), `values` (object)
-  - Returns: Dictionary with operation result
-
-- **unlink_record**: Delete a single record
-  - Inputs: `model_name` (string), `record_id` (number)
-  - Returns: Dictionary with operation result
-
-- **unlink_records**: Delete multiple records
-  - Inputs: `model_name` (string), `record_ids` (array)
-  - Returns: Dictionary with operation result
-
-### Search and Query Operations
+### Data Retrieval
 
 - **search_records**: Search for records with advanced filtering
   - Inputs: `model_name` (string), `domain` (array), `fields` (optional array), `limit` (optional number), `offset` (optional number), `order` (optional string)
@@ -49,10 +21,40 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
   - Inputs: `model_name` (string), `domain` (array)
   - Returns: Dictionary with count
 
-### Model Operations
+- **read_records**: Read specific records by their IDs
+  - Inputs: `model_name` (string), `ids` (array of ints), `fields` (optional array)
+  - Returns: Dictionary with record data
 
-- **search_models**: Search for available models in the Odoo system
-  - Inputs: `query` (string) - Search term for model names and display names
+- **read_group**: Group and aggregate records
+  - Inputs: `model_name` (string), `domain` (array), `fields` (array with optional aggregations), `groupby` (array), `offset` (optional number), `limit` (optional number), `order` (optional string)
+  - Returns: Dictionary with grouped results
+
+### Data Modification
+
+- **create_records**: Create records
+  - Inputs: `model_name` (string), `values_list` (array of objects)
+  - Returns: Dictionary with created record IDs
+
+- **write_records**: Update records by ID
+  - Inputs: `model_name` (string), `record_ids` (array of ints), `values` (object)
+  - Returns: Dictionary with operation result
+
+- **search_and_write**: Search for records, then update matched records
+  - Inputs: `model_name` (string), `domain` (array), `values` (object)
+  - Returns: Dictionary with affected record count and IDs
+
+- **unlink_records**: Delete records by ID
+  - Inputs: `model_name` (string), `record_ids` (array of ints)
+  - Returns: Dictionary with operation result
+
+- **search_and_unlink**: Search for records, then delete matched records
+  - Inputs: `model_name` (string), `domain` (array)
+  - Returns: Dictionary with affected record count and IDs
+
+### Model Metadata
+
+- **search_models**: Search for available models
+  - Inputs: `query` (string) — search term for model names and display names
   - Returns: Dictionary with matching models
 
 - **get_model_info**: Get information about a specific model
@@ -60,20 +62,16 @@ Inspired by [tuanle96/mcp-odoo](https://github.com/tuanle96/mcp-odoo).
   - Returns: Dictionary with model information
 
 - **get_model_fields**: Get field definitions for a model
-  - Inputs: `model_name` (string), `query_field` (string)
+  - Inputs: `model_name` (string), `query_field` (string) — search term for field names and labels
   - Returns: Dictionary with field definitions
 
-### Utility Operations
-
-- **search_and_update**: Search and update records in one operation
-  - Inputs: `model_name` (string), `domain` (array), `values` (object)
-  - Returns: Dictionary with affected record count and IDs
+### Utility
 
 - **get_current_user**: Retrieve information about the currently authenticated Odoo user
   - Inputs: `fields` (optional array of strings)
   - Returns: Dictionary with current user data
 
-- **call_method**: Call custom methods on models
+- **call_method**: Call an arbitrary method on a model
   - Inputs: `model_name` (string), `method_name` (string), `args` (optional array), `kwargs` (optional object)
   - Returns: Dictionary with method result
 

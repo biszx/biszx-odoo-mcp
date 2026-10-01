@@ -133,7 +133,8 @@ class OdooClient:
         """
         self.config = config
         parsed_url = urllib.parse.urlparse(self.config.url)
-        self.hostname = parsed_url.netloc
+        self.hostname = parsed_url.hostname or "localhost"
+        self.port: int | None = parsed_url.port
         self.odoo: odoorpc.ODOO | None = None  # Will be initialized in _connect
         self.uid: int | None = None  # Will be set after login
         self.user: dict[str, Any] | None = None  # Will be set after login
@@ -159,7 +160,7 @@ class OdooClient:
             # Determine protocol and port based on URL scheme
             is_https = self.config.url.startswith("https://")
             protocol = "jsonrpc+ssl" if is_https else "jsonrpc"
-            port = 443 if is_https else 80
+            port = self.port or (443 if is_https else 80)
 
             self.odoo = odoorpc.ODOO(
                 self.hostname,

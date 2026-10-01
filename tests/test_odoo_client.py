@@ -88,6 +88,123 @@ class TestOdooClientInitialization:
             OdooClient(mock_config)
 
 
+class TestPortParsing:
+    """Test cases for hostname and port parsing from URL"""
+
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.logger")
+    def test_port_from_url(self, mock_logger, mock_odoo_rpc):
+        """Test that port is parsed from URL and passed to odoorpc"""
+        mock_odoo_instance = Mock()
+        mock_odoo_rpc.return_value = mock_odoo_instance
+        mock_user_model = Mock()
+        mock_user_model.search_read.return_value = [
+            {"id": 1, "name": "Admin", "login": "admin", "email": "a@b.com",
+             "lang": "en_US", "tz": "UTC", "company_id": 1, "partner_id": 1,
+             "employee_ids": []}
+        ]
+        mock_odoo_instance.env = {"res.users": mock_user_model}
+
+        config = Mock()
+        config.url = "http://localhost:8069"
+        config.db = "test_db"
+        config.username = "test_user"
+        config.password = "test_password"
+        config.timeout = 30
+
+        client = OdooClient(config)
+
+        assert client.hostname == "localhost"
+        assert client.port == 8069
+        mock_odoo_rpc.assert_called_once()
+        call_kwargs = mock_odoo_rpc.call_args[1]
+        assert call_kwargs["port"] == 8069
+
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.logger")
+    def test_port_default_http(self, mock_logger, mock_odoo_rpc):
+        """Test that default port 80 is used when URL has no port (http)"""
+        mock_odoo_instance = Mock()
+        mock_odoo_rpc.return_value = mock_odoo_instance
+        mock_user_model = Mock()
+        mock_user_model.search_read.return_value = [
+            {"id": 1, "name": "Admin", "login": "admin", "email": "a@b.com",
+             "lang": "en_US", "tz": "UTC", "company_id": 1, "partner_id": 1,
+             "employee_ids": []}
+        ]
+        mock_odoo_instance.env = {"res.users": mock_user_model}
+
+        config = Mock()
+        config.url = "http://localhost"
+        config.db = "test_db"
+        config.username = "test_user"
+        config.password = "test_password"
+        config.timeout = 30
+
+        client = OdooClient(config)
+
+        assert client.hostname == "localhost"
+        assert client.port is None
+        call_kwargs = mock_odoo_rpc.call_args[1]
+        assert call_kwargs["port"] == 80
+
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.logger")
+    def test_port_default_https(self, mock_logger, mock_odoo_rpc):
+        """Test that default port 443 is used when URL has no port (https)"""
+        mock_odoo_instance = Mock()
+        mock_odoo_rpc.return_value = mock_odoo_instance
+        mock_user_model = Mock()
+        mock_user_model.search_read.return_value = [
+            {"id": 1, "name": "Admin", "login": "admin", "email": "a@b.com",
+             "lang": "en_US", "tz": "UTC", "company_id": 1, "partner_id": 1,
+             "employee_ids": []}
+        ]
+        mock_odoo_instance.env = {"res.users": mock_user_model}
+
+        config = Mock()
+        config.url = "https://test.odoo.com"
+        config.db = "test_db"
+        config.username = "test_user"
+        config.password = "test_password"
+        config.timeout = 30
+
+        client = OdooClient(config)
+
+        assert client.hostname == "test.odoo.com"
+        assert client.port is None
+        call_kwargs = mock_odoo_rpc.call_args[1]
+        assert call_kwargs["port"] == 443
+
+    @patch("biszx_odoo_mcp.tools.odoo_client.odoorpc.ODOO")
+    @patch("biszx_odoo_mcp.tools.odoo_client.logger")
+    def test_custom_port_https(self, mock_logger, mock_odoo_rpc):
+        """Test that custom port is used with HTTPS"""
+        mock_odoo_instance = Mock()
+        mock_odoo_rpc.return_value = mock_odoo_instance
+        mock_user_model = Mock()
+        mock_user_model.search_read.return_value = [
+            {"id": 1, "name": "Admin", "login": "admin", "email": "a@b.com",
+             "lang": "en_US", "tz": "UTC", "company_id": 1, "partner_id": 1,
+             "employee_ids": []}
+        ]
+        mock_odoo_instance.env = {"res.users": mock_user_model}
+
+        config = Mock()
+        config.url = "https://example.com:8443"
+        config.db = "test_db"
+        config.username = "test_user"
+        config.password = "test_password"
+        config.timeout = 30
+
+        client = OdooClient(config)
+
+        assert client.hostname == "example.com"
+        assert client.port == 8443
+        call_kwargs = mock_odoo_rpc.call_args[1]
+        assert call_kwargs["port"] == 8443
+
+
 class TestOdooClientModelIntrospection:
     """Test cases for model introspection methods"""
 

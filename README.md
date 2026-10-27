@@ -33,15 +33,15 @@ All tools support an optional `save_to` parameter to save results to a JSON file
 
 - **create_records**: Create records
   - Inputs: `model_name` (string), `values_list` (array of objects)
-  - Returns: Dictionary with created record IDs
+  - Returns: Dictionary with `url`, `db`, `model` and the created `ids`
 
 - **write_records**: Update records by ID
   - Inputs: `model_name` (string), `record_ids` (array of ints), `values` (object)
-  - Returns: Dictionary with operation result
+  - Returns: Dictionary with operation result, `url`, `db`, `model` and `ids`
 
 - **search_and_write**: Search for records, then update matched records
   - Inputs: `model_name` (string), `domain` (array), `values` (object)
-  - Returns: Dictionary with affected record count and IDs
+  - Returns: Dictionary with affected record count and IDs, `url`, `db` and `model`
 
 - **unlink_records**: Delete records by ID
   - Inputs: `model_name` (string), `record_ids` (array of ints)
@@ -69,7 +69,7 @@ All tools support an optional `save_to` parameter to save results to a JSON file
 
 - **get_current_user**: Retrieve information about the currently authenticated Odoo user
   - Inputs: `fields` (optional array of strings)
-  - Returns: Dictionary with current user data
+  - Returns: Dictionary with current user data, plus the connected `url` and `db`
 
 - **call_method**: Call an arbitrary method on a model
   - Inputs: `model_name` (string), `method_name` (string), `args` (optional array), `kwargs` (optional object)

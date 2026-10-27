@@ -11,6 +11,14 @@ from biszx_odoo_mcp.server.context import AppContext
 from biszx_odoo_mcp.server.response import Response
 
 
+def _connection(app_context: AppContext) -> dict[str, str]:
+    """
+    Return the Odoo url and database this server is connected to.
+    """
+    config = app_context.odoo.config
+    return {"url": config.url, "db": config.db}
+
+
 async def search_models(mcp: Any, query: str) -> Response:
     """
     Get a list of all available models in the Odoo system.
@@ -101,14 +109,15 @@ async def get_current_user(mcp: Any, fields: list[str] | None = None) -> Respons
         fields: Optional list of user fields to return.
         save_to: Optional file path to save the results to a JSON file
     Returns:
-        Dictionary with the current user information.
+        Dictionary with the current user information, plus the connected
+        Odoo `url` and `db`.
     """
     ctx = mcp.get_context()
     app_context = cast(AppContext, ctx.request_context.lifespan_context)
 
     try:
         data = app_context.odoo.get_current_user(fields=fields)
-        return Response(data=data)
+        return Response(data={**data, **_connection(app_context)})
     except OdooMCPError as e:
         return Response(error=e.to_dict())
     except Exception as e:
@@ -252,7 +261,8 @@ async def create_records(
         values_list: List of dictionaries with field values for the new records
         save_to: Optional file path to save the results to a JSON file
     Returns:
-        Dictionary with the created record IDs
+        Dictionary with the connected `url` and `db`, the `model` and the
+        created record `ids`
     """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
@@ -260,7 +270,15 @@ async def create_records(
 
     try:
         record_ids = app_context.odoo.create_records(model_name, values_list)
-        return Response(data={"ids": record_ids})
+        if isinstance(record_ids, int):
+            record_ids = [record_ids]
+        return Response(
+            data={
+                **_connection(app_context),
+                "model": model_name,
+                "ids": record_ids,
+            }
+        )
     except OdooMCPError as e:
         return Response(error=e.to_dict())
 
@@ -279,7 +297,8 @@ async def write_records(
         values: Dictionary with field values to update
         save_to: Optional file path to save the results to a JSON file
     Returns:
-        Dictionary with operation result
+        Dictionary with operation result, the connected `url` and `db`, the
+        `model` and the updated record `ids`
     """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
@@ -287,7 +306,14 @@ async def write_records(
 
     try:
         result = app_context.odoo.write_records(model_name, record_ids, values)
-        return Response(data={"success": result})
+        return Response(
+            data={
+                "success": result,
+                **_connection(app_context),
+                "model": model_name,
+                "ids": record_ids,
+            }
+        )
     except OdooMCPError as e:
         return Response(error=e.to_dict())
 
@@ -306,7 +332,8 @@ async def search_and_write(
         values: Dictionary with field values to update
         save_to: Optional file path to save the results to a JSON file
     Returns:
-        Dictionary with operation results including affected record count
+        Dictionary with operation results including affected record count,
+        the connected `url` and `db` and the `model`
     """
     # Access lifespan context to get the Odoo client
     ctx = mcp.get_context()
@@ -316,7 +343,14 @@ async def search_and_write(
         # First search for IDs
         record_ids = app_context.odoo.search_ids(model_name, domain)
         if not record_ids:
-            return Response(data={"affected_records": 0, "message": "No records found"})
+            return Response(
+                data={
+                    "affected_records": 0,
+                    "message": "No records found",
+                    **_connection(app_context),
+                    "model": model_name,
+                }
+            )
 
         # Then update the found records
         app_context.odoo.write_records(model_name, record_ids, values)
@@ -324,6 +358,8 @@ async def search_and_write(
             data={
                 "affected_records": len(record_ids),
                 "record_ids": record_ids,
+                **_connection(app_context),
+                "model": model_name,
             }
         )
     except OdooMCPError as e:
